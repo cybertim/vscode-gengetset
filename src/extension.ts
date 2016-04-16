@@ -19,14 +19,19 @@ export function activate(context: vscode.ExtensionContext) {
     var regCName = /class\s([a-zA-Z]+)/;
     var regVName = /[\s]*private[\s]*([a-zA-Z_$][0-9a-zA-Z_$]*)[\s]?\:[\s]?([\.\<\>\{\}\[\]a-zA-Z_$]+)[\s\=|\;]/;
 
+    function figure(name: string): string {
+        if (name.startsWith('_')) return name.substring(1);
+        return '$' + name;
+    }
+
     function getGetter(item: IFar): string {
-        return '\n\tpublic get ' + item.name + '(): ' + item.typeName + ' {\n' +
+        return '\n\tpublic get ' + figure(item.name) + '(): ' + item.typeName + ' {\n' +
             '\t\treturn this.' + item.name + ';\n' +
             '\t}\n';
     }
 
     function getSetter(item: IFar): string {
-        return '\n\tpublic set ' + item.name + '(value: ' + item.typeName + ') {\n' +
+        return '\n\tpublic set ' + figure(item.name) + '(value: ' + item.typeName + ') {\n' +
             '\t\tthis.' + item.name + ' = value;\n' +
             '\t}\n';
     }
