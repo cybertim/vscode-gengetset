@@ -1,0 +1,60 @@
+{
+    "name": "vscode-generate-getter-setter",
+    "displayName": "Generate Getter and Setter",
+    "description": "Auto generate getter and/or setter for private variables within classes",
+    "version": "0.0.1",
+    "publisher": "Tim",
+    "icon": "GenGetSet.png",
+    "galleryBanner": {
+        "color": "#5c2d91",
+        "theme": "dark"
+    },
+    "engines": {
+        "vscode": "^1.0.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:genGetSet.getter",
+        "onCommand:genGetSet.setter",
+        "onCommand:genGetSet.getterAndSetter"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "genGetSet.getter",
+                "title": "Generate Getter"
+            },
+            {
+                "command": "genGetSet.setter",
+                "title": "Generate Setter"
+            },
+            {
+                "command": "genGetSet.getterAndSetter",
+                "title": "Generate Getter and Setter"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Generate Getter and Setter configuration",
+            "properties": {
+                "genGetSet.scoped": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Only show private variable results from cursor position current class."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "typescript": "^1.8.5",
+        "vscode": "^0.11.0"
+    }
+}
