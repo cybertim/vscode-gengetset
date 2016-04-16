@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "Generate Getter and Setter",
     "description": "Auto generate getter and/or setter for private variables within classes",
-    "version": "0.0.1",
+    "version": "0.1",
     "publisher": "Tim",
     "icon": "GenGetSet.png",
     "galleryBanner": {
@@ -11,6 +11,14 @@
     },
     "engines": {
         "vscode": "^1.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cybertim/vscode-gengetset.git"
+    },
+    "homepage": "https://github.com/cybertim/vscode-gengetset",
+    "bugs": {
+        "url": "https://github.com/cybertim/vscode-gengetset/issues"
     },
     "categories": [
         "Other"
