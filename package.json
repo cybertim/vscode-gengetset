@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "Generate Getter and Setter",
     "description": "Auto generate getter and/or setter for private variables within classes",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {
