@@ -1,8 +1,8 @@
 {
     "name": "vscode-generate-getter-setter",
-    "displayName": "Generate Getter and Setter",
-    "description": "Auto generate getter and/or setter for private variables within classes",
-    "version": "0.1.2",
+    "displayName": "TypeScript Getter and Setter Generator",
+    "description": "Auto generate a constructor, getter and/or setter within classes",
+    "version": "0.1.3",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {
@@ -26,10 +26,15 @@
     "activationEvents": [
         "onCommand:genGetSet.getter",
         "onCommand:genGetSet.setter",
-        "onCommand:genGetSet.getterAndSetter"
+        "onCommand:genGetSet.getterAndSetter",
+        "onCommand:genGetSet.constructor",
+        "onCommand:genGetSet.popup"
     ],
     "main": "./out/src/extension",
     "contributes": {
+        "keybindings": [
+            { "command": "genGetSet.popup", "key": "alt+shift+g", "when": "editorTextFocus"}
+        ],
         "commands": [
             {
                 "command": "genGetSet.getter",
@@ -42,6 +47,10 @@
             {
                 "command": "genGetSet.getterAndSetter",
                 "title": "Generate Getter and Setter"
+            },
+            {
+                "command": "genGetSet.constructor",
+                "title": "Generate Constructor"
             }
         ],
         "configuration": {
@@ -51,7 +60,12 @@
                 "genGetSet.scoped": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Only show private variable results from cursor position current class."
+                    "description": "Only show entries from current cursor position class."
+                },
+                "genGetSet.filter": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Only show entries which haven't been generated yet."
                 }
             }
         }

@@ -1,5 +1,6 @@
 out
 node_modules
-typings
 .DS_Store
 .idea
+typings/*
+!typings/vscode*
