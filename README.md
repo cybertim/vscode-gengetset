@@ -4,6 +4,10 @@
 
 ## Changelog
 
+### v0.1.5
++ updated README
++ added demo screencast
+
 ### v0.1.4
 + generate constructor
 + filter already generated getter/setters
