@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Getter and Setter Generator",
     "description": "Auto generate a constructor, getter and/or setter within classes",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {

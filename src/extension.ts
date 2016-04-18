@@ -240,6 +240,15 @@ export function activate(context: vscode.ExtensionContext) {
                 description: 'public set <name>'
             }
         ]).then((result) => {
+            if (result.label.indexOf('Getter and Setter') !== -1) {
+                vscode.commands.executeCommand('genGetSet.getterAndSetter');
+            } else if (result.label.indexOf('Getter') !== -1) {
+                vscode.commands.executeCommand('genGetSet.getter');
+            } else if (result.label.indexOf('Setter') !== -1) {
+                vscode.commands.executeCommand('genGetSet.setter');
+            } else {
+                vscode.commands.executeCommand('genGetSet.constructor');
+            }
         });
     });
 

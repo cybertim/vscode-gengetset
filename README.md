@@ -1,13 +1,10 @@
-# Generate Getter Setter
+# Automatically Generate Constructors, Getters and Setters
 
-## Experimental
-
-Currently only works with TypeScript.
-Can easily be extended to other languages. (see github).
+![Demo](demo.gif)
 
 ## Changelog
 
-### v0.1.3
+### v0.1.4
 + generate constructor
 + filter already generated getter/setters
 + quick menu with `alt+shift+G`
@@ -73,5 +70,8 @@ public set $name(value: string) {
 
 Always `type` your variables. Even when your variable is being initialized, else the extension cannot read the typing.
 Always do this: `private _name: boolean = false;`
+
+Currently only works with TypeScript.
+Can easily be extended to other languages. (see github).
 
 **Enjoy!**
