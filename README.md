@@ -1,8 +1,18 @@
-# Automatically Generate Constructors, Getters and Setters
+# Generate Constructors, Getters and Setters
 
-![Demo](demo.gif)
+![Demo](demo1.gif)
+Generate getters and setters based on private variables.
+
+![Demo](demo2.gif)
+Complete with intellisense the exports in your workspace and auto generate import lines.
 
 ## Changelog
+
+### v0.1.6
++ import assistant: generate import lines
++ intellisense for exports from other files
++ better error handling
++ import demo screencast 
 
 ### v0.1.5
 + updated README

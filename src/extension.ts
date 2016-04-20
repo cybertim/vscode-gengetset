@@ -8,12 +8,19 @@ enum EAction {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    
-    //let formatImport = new suggest.FormatImport();
-    //vscode.languages.registerDocumentFormattingEditProvider(suggest.modeId, formatImport);
-    
+
     let suggestImport = new suggest.SuggestImport();
     vscode.languages.registerCompletionItemProvider(suggest.modeId, suggestImport);
+
+    // update intellisense typings (re-scan) when a document is saved
+    vscode.workspace.onDidSaveTextDocument((event) => {
+        suggestImport.reScan();
+    });
+
+    let subImport = vscode.commands.registerCommand('genGetSet.import', () => {
+        suggestImport.importAssist();
+    });
+    context.subscriptions.push(subImport);
 
     let subGetter = vscode.commands.registerCommand('genGetSet.getter', () => {
         var items = analyze.scanFile(analyze.EAction.GETTER);
@@ -48,12 +55,16 @@ export function activate(context: vscode.ExtensionContext) {
     let subPopup = vscode.commands.registerCommand('genGetSet.popup', () => {
         vscode.window.showQuickPick([
             <vscode.QuickPickItem>{
-                label: 'Getter and Setter',
-                description: 'both public get and set <name>'
+                label: 'Import Assistant',
+                description: 'import {...} from'
             },
             <vscode.QuickPickItem>{
                 label: 'Constructor',
-                description: 'constructor(name)'
+                description: 'public constructor(...)'
+            },
+            <vscode.QuickPickItem>{
+                label: 'Getter and Setter',
+                description: 'both public get and set <name> (...)'
             },
             <vscode.QuickPickItem>{
                 label: 'Getter',
@@ -61,10 +72,12 @@ export function activate(context: vscode.ExtensionContext) {
             },
             <vscode.QuickPickItem>{
                 label: 'Setter',
-                description: 'public set <name>'
+                description: 'public set <name> (...)'
             }
         ]).then((result) => {
-            if (result && result.label.indexOf('Getter and Setter') !== -1) {
+            if (result && result.label.indexOf('Import Assistant') !== -1) {
+                suggestImport.importAssist();
+            } else if (result && result.label.indexOf('Getter and Setter') !== -1) {
                 vscode.commands.executeCommand('genGetSet.getterAndSetter');
             } else if (result && result.label.indexOf('Getter') !== -1) {
                 vscode.commands.executeCommand('genGetSet.getter');

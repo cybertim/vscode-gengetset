@@ -29,6 +29,7 @@
         "onCommand:genGetSet.getterAndSetter",
         "onCommand:genGetSet.constructor",
         "onCommand:genGetSet.popup",
+        "onCommand:genGetSet.import",
         "onLanguage:typescript"
     ],
     "main": "./out/src/extension",
@@ -52,6 +53,10 @@
             {
                 "command": "genGetSet.constructor",
                 "title": "Generate Constructor"
+            },
+            {
+                "command": "genGetSet.import",
+                "title": "Import Assistant"
             }
         ],
         "configuration": {
