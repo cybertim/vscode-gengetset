@@ -28,7 +28,8 @@
         "onCommand:genGetSet.setter",
         "onCommand:genGetSet.getterAndSetter",
         "onCommand:genGetSet.constructor",
-        "onCommand:genGetSet.popup"
+        "onCommand:genGetSet.popup",
+        "onLanguage:typescript"
     ],
     "main": "./out/src/extension",
     "contributes": {

@@ -1,7 +1,0 @@
-{
-  "name": "vscode-generate-getter-setter",
-  "version": false,
-  "ambientDependencies": {
-    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#544a35a10866b32afda9c7f029c0764558563f4f"
-  }
-}
