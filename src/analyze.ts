@@ -66,7 +66,7 @@ export function scanFile(action: EAction): IKlass[] {
     var items: IKlass[] = [];
     var matcher = createMatcher(vscode.window.activeTextEditor.document.languageId);
     if (matcher == null) {
-        vscode.window.showWarningMessage('Sorry, this ${commandName} does not support current language.');
+        vscode.window.showWarningMessage('Sorry, this extension does not support current language.');
         return;
     }
 

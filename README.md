@@ -1,12 +1,16 @@
 # Generate Constructors, Getters and Setters
 
 ![Demo](demo1.gif)
-Generate getters and setters based on private variables.
+Generate a constructor, get- setters methods based on private variables.
 
 ![Demo](demo2.gif)
-Complete with intellisense the exports in your workspace and auto generate import lines.
+Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
+
+### v0.1.7
++ minor bug fixes
++ re-index exports on file save
 
 ### v0.1.6
 + import assistant: generate import lines

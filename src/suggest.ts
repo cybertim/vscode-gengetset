@@ -9,15 +9,13 @@ interface IExpose {
 
 export let modeId: string = 'typescript';
 
-//
-// TODO refresh list when saving/editting a document
-//
 export class SuggestImport implements vscode.CompletionItemProvider {
 
     private exposeCache: IExpose[];
     private regex_all = /([a-zA-Z]+)[\[\:\)|\s|\(|\.|\;]+/g;
     private regex_one = /([a-zA-Z]+)[\[\:\)|\s|\(|\.|\;]+/;
     private regex_export = /export[\s]+[\=]?[\s]?[a-zA-Z]*[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\(|\s|\;]/;
+    private regex_import_wildcard = /import[\s]+\*[\s]+as[\s]+[\S]*[\s]+from[\s]+[\'|\"]+([\S]*)[\'|\"]+[\;]?/;
     private regex_import = /import[\s]+[\{]*[\s]*[a-zA-Z\,\s]*[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/;
 
     constructor() {
@@ -39,6 +37,11 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     }
 
     public importAssist() {
+        let languageId = vscode.window.activeTextEditor.document.languageId;
+        if(languageId !== 'typescript') {
+            vscode.window.showWarningMessage('Sorry, this extension does not support current language.');
+            return;
+        }
         vscode.window.activeTextEditor.edit((editBuilder) => {
             // first loop through all lines and replace them if needed
             let list = this.createList();
@@ -54,6 +57,15 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                             let range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                             editBuilder.replace(range, this.createLine(list.splice(j, 1)[0]));
                             break;
+                        }
+                    }
+                }
+                // check if it is a wildcard import and also remove the line from the list without doing anything
+                matcher = line.text.match(this.regex_import_wildcard);
+                if(matcher) {
+                    for (let j = list.length - 1; j >= 0; j--) {
+                        if (matcher[1] === list[j].path + list[j].name) {
+                            list.splice(j, 1);
                         }
                     }
                 }
