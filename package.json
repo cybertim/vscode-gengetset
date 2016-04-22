@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Import Assist and Get- Setter Generator",
     "description": "Import line, constructor and get- setter generator plus autocomplete for exports within the workspace.",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {
@@ -63,6 +63,11 @@
             "type": "object",
             "title": "Generate Getter and Setter configuration",
             "properties": {
+                "genGetSet.ignoreWildcard": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Don't add individual imports for a file when there is already a wildcard import."
+                },
                 "genGetSet.scoped": {
                     "type": "boolean",
                     "default": true,

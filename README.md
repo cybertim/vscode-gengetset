@@ -8,6 +8,10 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
 
+### v0.1.8
++ ignore imports when there is already a wildcard import
++ better export detection
+
 ### v0.1.7
 + minor bug fixes
 + re-index exports on file save
@@ -33,8 +37,9 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Settings
 
-1. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
-2. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
+1. `genGetSet.ignoreWildcard` (default: enabled) when there is already a wildcard import like `import * as fs from 'fs';` do not add individual import lines for exports from this file.
+2. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
+3. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
 
 ## Usage
 
