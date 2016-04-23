@@ -97,8 +97,8 @@ export class SuggestImport implements vscode.CompletionItemProvider {
         // grab all 'words' from the open text in the editor
         let matches: RegExpMatchArray = vscode.window.activeTextEditor.document.getText().toString().match(this.regex_all);
         let fname = vscode.window.activeTextEditor.document.fileName;
-        let pcount = fname.split('/').length;
         let cname = fname.substring(fname.lastIndexOf('/') + 1, fname.length - 3);
+        let pname = fname.substring(0, fname.lastIndexOf('/') + 1);
         for (let i = 1; i < matches.length; i++) {
             // sub match the correct string, because javascript can't directly globally match groups... :( 
             let m = matches[i].match(this.regex_one);
@@ -123,7 +123,7 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                                 // this is for a correct import listing (like ../ or ./)
                                 var z = <IExpose>{
                                     name: this.exposeCache[j].name,
-                                    path: this.createPath(this.exposeCache[j].path, pcount),
+                                    path: this.createPath(this.exposeCache[j].path, pname),
                                     exported: []
                                 };
                                 z.exported.push(m[1]);
@@ -137,22 +137,45 @@ export class SuggestImport implements vscode.CompletionItemProvider {
         return list;
     }
 
-    private createPath(path: string, pcount: number): string {
-        var c = path.split('/').length;
-        if (c == pcount) {
-            return './';
-        } else if (c < pcount) {
+    private createPath(target: string, source: string): string {
+        let dirs = source.split('/');
+        let cdirs = target.split('/');
+        let differ = -1;
+        let count = source.split('/').length;
+        // check if the strings are the same (path differ)
+        for (let i = 0; i < dirs.length; i++) {
+            if (i <= cdirs.length && dirs[i] != '' && cdirs[i] != '' && dirs[i] != cdirs[i]) {
+                // path differs from here
+                differ = i;
+            }
+        }
+        if (differ == -1 && dirs.length > cdirs.length) {
+            // path lays lower
             let r = '';
-            for (let m = c; m < pcount; m++) {
-                r += '../'
+            for (let m = 0; m < (dirs.length - cdirs.length); m++) {
+                r += '../';
             }
             return r;
-        } else {
+        } else if (differ == -1 && dirs.length < cdirs.length) {
+            // path lays higher
             let r = './';
-            for (let m = pcount; m < c; m++) {
-                r += path.split('/')[m - 1];
+            for (let m = 0; m < (cdirs.length - dirs.length); m++) {
+                r += target.split('/')[count - 1 + m] + '/';
             }
-            return r + '/';
+            return r;
+        } else if (differ == -1) {
+            // same path depth
+            return './';
+        } else {
+            // path differs
+            let r = '';
+            for (let i = 1; i < count - differ; i++) {
+                r += '../';
+            }
+            for (let i = differ + 1; i < cdirs.length; i++) {
+                r += target.split('/')[i - 1] + '/';
+            }
+            return r;
         }
     }
 
