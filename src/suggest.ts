@@ -53,10 +53,7 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                 // replace matched lines with new imports
                 if (matcher) {
                     for (let j = list.length - 1; j >= 0; j--) {
-
-                        if (matcher[1] === path.join(list[j].path, list[j].name)) {
-                            //this.replaceLine(list.splice(j, 1)[0], i);
-
+                        if (matcher[1] === this.sanitizePath(list[j].path, list[j].name)) {
                             let range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                             editBuilder.replace(range, this.createLine(list.splice(j, 1)[0]));
                             break;
@@ -91,9 +88,15 @@ export class SuggestImport implements vscode.CompletionItemProvider {
             txt += expose.exported[i];
         }
         //if the files are in the same directory we need to add a .
-        const prefix: string = expose.path.length == 0 ? "." : "";
-        txt += '} from \'' + path.join(expose.path, expose.name) + '\';\n'
+        //const prefix: string = expose.path.length == 0 ? "." : "";
+        txt += '} from \'' + this.sanitizePath(expose.path, expose.name) + '\';\n'
         return txt;
+    }
+
+    private sanitizePath(p: string, n: string): string {
+        let prefix = '';
+        if (!p.startsWith('.')) prefix = './';
+        return prefix + path.join(p, n);
     }
 
     private createList(): IExpose[] {
