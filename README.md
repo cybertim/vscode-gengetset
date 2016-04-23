@@ -1,4 +1,4 @@
-# Generate Constructors, Getters and Setters
+# Generate Imports, Constructors, Getters and Setters
 
 ![Demo](demo1.gif)
 Generate a constructor, get- setters methods based on private variables.
@@ -7,6 +7,11 @@ Generate a constructor, get- setters methods based on private variables.
 Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
+
+### v0.1.9
++ wildcard import line support based on type definition files
++ intellisense now knows about type definition files
++ fixed import line path issues
 
 ### v0.1.8
 + ignore imports when there is already a wildcard import
@@ -35,11 +40,14 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 + generate getter / setter
 + scoped variable listing
 
+## Install
+Get VSCode and grab the extension from the [VSCode Extension Market](https://marketplace.visualstudio.com/items?itemName=DSKWRK.vscode-generate-getter-setter)
+
 ## Settings
 
-1. `genGetSet.ignoreWildcard` (default: enabled) when there is already a wildcard import like `import * as fs from 'fs';` do not add individual import lines for exports from this file.
-2. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
-3. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
+1. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
+2. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
+3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
 
 ## Usage
 
