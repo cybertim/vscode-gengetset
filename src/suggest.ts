@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
+import * as path from 'path'
 
 interface IExpose {
     name: string;
@@ -52,8 +53,10 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                 // replace matched lines with new imports
                 if (matcher) {
                     for (let j = list.length - 1; j >= 0; j--) {
-                        if (matcher[1] === list[j].path + list[j].name) {
+
+                        if (matcher[1] === path.join(list[j].path, list[j].name)) {
                             //this.replaceLine(list.splice(j, 1)[0], i);
+
                             let range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                             editBuilder.replace(range, this.createLine(list.splice(j, 1)[0]));
                             break;
@@ -87,7 +90,9 @@ export class SuggestImport implements vscode.CompletionItemProvider {
             if (i != 0) txt += ', ';
             txt += expose.exported[i];
         }
-        txt += '} from \'' + expose.path + expose.name + '\';\n'
+        //if the files are in the same directory we need to add a .
+        const prefix: string = expose.path.length == 0 ? "." : "";
+        txt += '} from \'' + path.join(expose.path, expose.name) + '\';\n'
         return txt;
     }
 
@@ -97,8 +102,9 @@ export class SuggestImport implements vscode.CompletionItemProvider {
         // grab all 'words' from the open text in the editor
         let matches: RegExpMatchArray = vscode.window.activeTextEditor.document.getText().toString().match(this.regex_all);
         let fname = vscode.window.activeTextEditor.document.fileName;
-        let cname = fname.substring(fname.lastIndexOf('/') + 1, fname.length - 3);
-        let pname = fname.substring(0, fname.lastIndexOf('/') + 1);
+        const parsedPath = path.parse(fname);
+        // let pcount = fname.split('/').length;
+        let cname = parsedPath.name;
         for (let i = 1; i < matches.length; i++) {
             // sub match the correct string, because javascript can't directly globally match groups... :( 
             let m = matches[i].match(this.regex_one);
@@ -121,9 +127,11 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                             if (!found) {
                                 // also match paths with current file
                                 // this is for a correct import listing (like ../ or ./)
-                                var z = <IExpose>{
+                                const filename = vscode.window.activeTextEditor.document.fileName;
+                                const pathOfFilename = path.parse(filename);
+                                var z: IExpose = {
                                     name: this.exposeCache[j].name,
-                                    path: this.createPath(this.exposeCache[j].path, pname),
+                                    path: path.relative(pathOfFilename.dir, this.exposeCache[j].path),
                                     exported: []
                                 };
                                 z.exported.push(m[1]);
@@ -137,48 +145,6 @@ export class SuggestImport implements vscode.CompletionItemProvider {
         return list;
     }
 
-    private createPath(target: string, source: string): string {
-        let dirs = source.split('/');
-        let cdirs = target.split('/');
-        let differ = -1;
-        let count = source.split('/').length;
-        // check if the strings are the same (path differ)
-        for (let i = 0; i < dirs.length; i++) {
-            if (i <= cdirs.length && dirs[i] != '' && cdirs[i] != '' && dirs[i] != cdirs[i]) {
-                // path differs from here
-                differ = i;
-            }
-        }
-        if (differ == -1 && dirs.length > cdirs.length) {
-            // path lays lower
-            let r = '';
-            for (let m = 0; m < (dirs.length - cdirs.length); m++) {
-                r += '../';
-            }
-            return r;
-        } else if (differ == -1 && dirs.length < cdirs.length) {
-            // path lays higher
-            let r = './';
-            for (let m = 0; m < (cdirs.length - dirs.length); m++) {
-                r += target.split('/')[count - 1 + m] + '/';
-            }
-            return r;
-        } else if (differ == -1) {
-            // same path depth
-            return './';
-        } else {
-            // path differs
-            let r = '';
-            for (let i = 1; i < count - differ; i++) {
-                r += '../';
-            }
-            for (let i = differ + 1; i < cdirs.length; i++) {
-                r += target.split('/')[i - 1] + '/';
-            }
-            return r;
-        }
-    }
-
     private scanFiles(): Thenable<IExpose[]> {
         return new Promise((resolve, reject) => {
             // scan all .ts files in the workspace and skip some common directories
@@ -189,9 +155,10 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                     for (let j = 0; j < excluded.length; j++) {
                         if (files[i].fsPath.indexOf(excluded[j]) == -1) {
                             // create the IExpose based on filename and path
-                            var expose = {
-                                name: files[i].fsPath.substring(files[i].fsPath.lastIndexOf('/') + 1, files[i].fsPath.length - 3),
-                                path: files[i].fsPath.substring(0, files[i].fsPath.lastIndexOf('/') + 1),
+                            const parsedPath = path.parse(files[i].fsPath)
+                            var expose: IExpose = {
+                                name: parsedPath.name,
+                                path: parsedPath.dir,
                                 exported: []
                             };
                             var data = fs.readFileSync(files[i].fsPath);
