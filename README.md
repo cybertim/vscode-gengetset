@@ -8,6 +8,9 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
 
+### v0.2.0
++ added a setting to enable classic getter and setter (disabled by default)
+
 ### v0.1.9
 + wildcard import line support based on type definition files
 + intellisense now knows about type definition files
@@ -48,6 +51,7 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 1. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
 2. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
 3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
+4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 
 ## Usage
 

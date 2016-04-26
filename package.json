@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Import Assist and Get- Setter Generator",
     "description": "Import line, constructor and get- setter generator plus autocomplete for exports within the workspace.",
-    "version": "0.1.9",
+    "version": "0.2.0",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {
@@ -81,6 +81,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Only show entries which haven't been generated yet."
+                },
+                "genGetSet.classic": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use 'getValue' and 'setValue' instead of 'get value' and 'set value'"
                 }
             }
         }
