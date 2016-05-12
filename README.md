@@ -53,6 +53,7 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
+6. `useSlashForImportPath` (default: false) Use '/' or '\\' in import path
 
 ## Usage
 
