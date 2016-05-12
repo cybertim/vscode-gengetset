@@ -85,6 +85,7 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     }
 
     private createLine(expose: IExpose): string {
+        let pathStringDelimiter = vscode.workspace.getConfiguration('genGetSet').get('pathStringDelimiter') || '\'';
         let txt = 'import ';
         if (!expose.dict) {
             // normal import from personal exports
@@ -94,10 +95,10 @@ export class SuggestImport implements vscode.CompletionItemProvider {
                 txt += expose.exported[i];
             }
             txt += '} from ';
-            txt += '\'' + this.sanitizePath(expose.path, expose.name) + '\'';
+            txt += pathStringDelimiter + this.sanitizePath(expose.path, expose.name) + pathStringDelimiter;
         } else {
             txt += '* as ' + expose.dict_name + ' from ';
-            txt += '\'' + expose.name + '\'';
+            txt += pathStringDelimiter + expose.name + pathStringDelimiter;
         }
         txt += ';\n';
         return txt;
@@ -106,7 +107,12 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     private sanitizePath(p: string, n: string): string {
         let prefix = '';
         if (!p.startsWith('.')) prefix = './';
-        return prefix + path.join(p, n);
+        
+        let pathComplete = path.join(p, n);
+        if (vscode.workspace.getConfiguration('genGetSet').get('useSlashForImportPath')) {
+            pathComplete = pathComplete.replace(new RegExp(/\\/, 'g'), '/');
+        }
+        return prefix + pathComplete;
     }
 
     private createList(): IExpose[] {

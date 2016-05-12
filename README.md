@@ -52,6 +52,7 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 2. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
 3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
+5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
 
 ## Usage
 

@@ -86,6 +86,16 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Use 'getValue' and 'setValue' instead of 'get value' and 'set value'"
+                },
+                "genGetSet.pathStringDelimiter": {
+                    "type": "string",
+                    "default": "'",
+                    "description": "Sets which quote use to generate import path"
+                },
+                "genGetSet.useSlashForImportPath": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use '/' or '\\' in import path"
                 }
             }
         }
