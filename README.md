@@ -8,6 +8,13 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
 
+### v0.2.1
++ added support for `\\` slashes (see settings)
++ added support for path delimiters (see settings)
++ fixed import issues with exports like enum
++ fixed import issues with dict variable names
++ intellisense on not-yet imported exports is now optional (see settings)
+
 ### v0.2.0
 + added a setting to enable classic getter and setter (disabled by default)
 
@@ -53,7 +60,8 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
-6. `useSlashForImportPath` (default: false) Use '/' or '\\' in import path
+6. `genGetSet.useSlashForImportPath` (default: false) Use '/' or '\\' in import path.
+7. `genGetSet.provideCompletion` (default: false) shows not-yet imported items as suggestion with intellisense.
 
 ## Usage
 
@@ -110,5 +118,9 @@ Always do this: `private _name: boolean = false;`
 
 Currently only works with TypeScript.
 Can easily be extended to other languages. (see github).
+
+## Contributors
+Special thanks to the github users:
+AngelMunoz, edotassi, Aranir
 
 **Enjoy!**

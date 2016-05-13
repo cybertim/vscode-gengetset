@@ -24,8 +24,8 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     private commonList: string[] = ['from', 'return', 'get', 'set', 'boolean', 'string', 'if', 'var', 'let', 'for', 'public', 'class', 'new', 'import', 'as', 'private', 'while', 'case', 'switch', 'this'];
     private exposeCache: IExpose[];
 
-    private regex_words = /([\'\"a-zA-Z]{2,})/g;
-    private regex_export = /export[\s]+[\=]?[\s]?[a-zA-Z]*[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;]/;
+    private regex_words = /([?_:\'\"a-zA-Z]{2,})/g;
+    private regex_export = /export[\s]+[\s]?[\=]?[\s]?[a-zA-Z]*[\s]+[enum]*[\s]?([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;]/;
     private regex_import = /import[\s]+[\*\{]*[\s]*[a-zA-Z\,\s]*[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/;
     private regex_module = /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/;
 
@@ -41,7 +41,10 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     }
 
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.CompletionItem[] {
-        return this.toItemArray();
+        let provideCompletion = vscode.workspace.getConfiguration('genGetSet').get('provideCompletion');
+        if (provideCompletion) return this.toItemArray();
+        return [];
+        //return this.toItemArray();
     }
 
     public importAssist() {
@@ -107,10 +110,10 @@ export class SuggestImport implements vscode.CompletionItemProvider {
     private sanitizePath(p: string, n: string): string {
         let prefix = '';
         if (!p.startsWith('.')) prefix = './';
-        
+
         let pathComplete = path.join(p, n);
         if (vscode.workspace.getConfiguration('genGetSet').get('useSlashForImportPath')) {
-            pathComplete = pathComplete.replace(new RegExp(/\\/, 'g'), '/');
+            pathComplete = pathComplete.replace(/\\/g, '/');
         }
         return prefix + pathComplete;
     }
