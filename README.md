@@ -8,6 +8,11 @@ Autocomplete exports from your workspace and generate appropriate import lines.
 
 ## Changelog
 
+### v0.2.2
++ better import matching
++ better `/` and `\\` based on platform
++ better private variable detection
+
 ### v0.2.1
 + added support for `\\` slashes (see settings)
 + added support for path delimiters (see settings)

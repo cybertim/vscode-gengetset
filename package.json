@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Import Assist and Get- Setter Generator",
     "description": "Import line, constructor and get- setter generator plus autocomplete for exports within the workspace.",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "publisher": "DSKWRK",
     "icon": "GenGetSet.png",
     "galleryBanner": {
@@ -10,7 +10,7 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "^1.0.0"
+        "vscode": "^1.1.1"
     },
     "repository": {
         "type": "git",
@@ -99,7 +99,7 @@
                 },
                 "genGetSet.provideCompletion": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Shows not-yet imported items as suggestion with intellisense."
                 }
             }
@@ -111,7 +111,7 @@
         "postinstall": "node ./node_modules/vscode/bin/install"
     },
     "devDependencies": {
-        "typescript": "^1.8.5",
-        "vscode": "^0.11.0"
+        "typescript": "^1.8.10",
+        "vscode": "^0.11.13"
     }
 }
