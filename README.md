@@ -1,72 +1,27 @@
-# Generate Imports, Constructors, Getters and Setters
+# Optimize Imports, Generate Getters / Setters and Constructors
 
-![Demo](demo1.gif)
-Generate a constructor, get- setters methods based on private variables.
-
-![Demo](demo2.gif)
-Autocomplete exports from your workspace and generate appropriate import lines.
+![Demo](demo.gif)
 
 ## Changelog
 
-### v0.2.2
-+ better import matching
-+ better `/` and `\\` based on platform
-+ better private variable detection
-
-### v0.2.1
-+ added support for `\\` slashes (see settings)
-+ added support for path delimiters (see settings)
-+ fixed import issues with exports like enum
-+ fixed import issues with dict variable names
-+ intellisense on not-yet imported exports is now optional (see settings)
-
-### v0.2.0
-+ added a setting to enable classic getter and setter (disabled by default)
-
-### v0.1.9
-+ wildcard import line support based on type definition files
-+ intellisense now knows about type definition files
-+ fixed import line path issues
-
-### v0.1.8
-+ ignore imports when there is already a wildcard import
-+ better export detection
-
-### v0.1.7
-+ minor bug fixes
-+ re-index exports on file save
-
-### v0.1.6
-+ import assistant: generate import lines
-+ intellisense for exports from other files
-+ better error handling
-+ import demo screencast 
-
-### v0.1.5
-+ updated README
-+ added demo screencast
-
-### v0.1.4
-+ generate constructor
-+ filter already generated getter/setters
-+ quick menu with `alt+shift+G`
-
-### v0.1.2
-+ generate getter / setter
-+ scoped variable listing
+### v0.3.0
++ complete optimized code rewrite of the extension
++ now with support for TypeScript based modules (ex. Ionic 2 and Angular 2)
++ import paths `/` are now completly OS independend
+- intellisense suggestions have been removed (searching for other solution)
++ and lots of small open issues have been fixed and/or optimized
 
 ## Install
 Get VSCode and grab the extension from the [VSCode Extension Market](https://marketplace.visualstudio.com/items?itemName=DSKWRK.vscode-generate-getter-setter)
 
 ## Settings
 
-1. `genGetSet.scoped` (default: enabled) switch between scoped or global search for private variables, when scoped only available private definitions from the class where the cursor resides will be shown.
-2. `genGetSet.filter` (default: enabled) show only private varaibles which haven't been generated yet based on getter and/or setter selection.
-3. `genGetSet.importTypings` (default: enabled) create import wildcard lines based on typing definition files.
+1. `genGetSet.scoped` (default: enabled) Only show private variables from current class based on cursor position.
+2. `genGetSet.filter` (default: enabled) Only show private variables which do not have a getter/setter method.
+3. `genGetSet.importTypings` (default: enabled) Create import lines based on definition files from /typings/.
+3. `genGetSet.importNode` (default: enabled) Create import lines based on definition files from /node_modules/.
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
-6. `genGetSet.useSlashForImportPath` (default: false) Use '/' or '\\' in import path.
-7. `genGetSet.provideCompletion` (default: false) shows not-yet imported items as suggestion with intellisense.
 
 ## Usage
 
@@ -121,8 +76,7 @@ public set $name(value: string) {
 Always `type` your variables. Even when your variable is being initialized, else the extension cannot read the typing.
 Always do this: `private _name: boolean = false;`
 
-Currently only works with TypeScript.
-Can easily be extended to other languages. (see github).
+This is a TypeScript only extension.
 
 ## Contributors
 Special thanks to the github users:

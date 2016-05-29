@@ -1,10 +1,10 @@
 {
     "name": "vscode-generate-getter-setter",
-    "displayName": "TypeScript Import Assist and Get- Setter Generator",
-    "description": "Import line, constructor and get- setter generator plus autocomplete for exports within the workspace.",
-    "version": "0.2.2",
+    "displayName": "TypeScript",
+    "description": "Optimize Imports, Generate Getters / Setters and Constructors",
+    "version": "0.3.0",
     "publisher": "DSKWRK",
-    "icon": "GenGetSet.png",
+    "icon": "icon.png",
     "galleryBanner": {
         "color": "#5c2d91",
         "theme": "dark"
@@ -70,17 +70,22 @@
                 "genGetSet.importTypings": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Create import wildcard lines based on typing definition files."
+                    "description": "Create import lines based on definition files from /typings/."
+                },
+                "genGetSet.importNode": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Create import lines based on definition files from /node_modules/."
                 },
                 "genGetSet.scoped": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Only show entries from current cursor position class."
+                    "description": "Only show private variables from current class based on cursor position."
                 },
                 "genGetSet.filter": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Only show entries which haven't been generated yet."
+                    "description": "Only show private variables which do not have a getter/setter method."
                 },
                 "genGetSet.classic": {
                     "type": "boolean",
@@ -91,16 +96,6 @@
                     "type": "string",
                     "default": "'",
                     "description": "Sets which quote use to generate import path."
-                },
-                "genGetSet.useSlashForImportPath": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Use '/' or '\\' in import path."
-                },
-                "genGetSet.provideCompletion": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Shows not-yet imported items as suggestion with intellisense."
                 }
             }
         }
@@ -108,7 +103,8 @@
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
         "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install"
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
         "typescript": "^1.8.10",
