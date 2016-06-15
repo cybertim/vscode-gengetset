@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript",
     "description": "Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -60,7 +60,7 @@
             },
             {
                 "command": "genGetSet.import",
-                "title": "Import Assistant"
+                "title": "Optimize Imports"
             }
         ],
         "configuration": {
