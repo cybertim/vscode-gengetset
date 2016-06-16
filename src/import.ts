@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-enum EType {
+export enum ExportType {
     NODE, TYPING, LOCAL
 }
 
@@ -10,7 +10,7 @@ export interface IExport {
     libraryName: string;
     path?: string;
     exported?: string[];
-    type: EType;
+    type: ExportType;
     asName?: string;
 }
 
@@ -27,8 +27,8 @@ const matchers = {
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
 }
 
-export function optimizeImports(exports: IExport[]) {
-    const filteredExports = filterExports(exports);
+export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
+    const filteredExports = filterExports(exports, nonTypedEntry);
     vscode.window.activeTextEditor.edit((builder) => {
         const lineCount = vscode.window.activeTextEditor.document.lineCount;
         // search for import-lines we can replace instead of adding another bunch of the same lines
@@ -41,7 +41,7 @@ export function optimizeImports(exports: IExport[]) {
                     const range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                     builder.replace(range, createImportLine(_export));
                     // remove this element from the list
-                    filteredExports.splice(filteredExports.indexOf(_export), 1); 
+                    filteredExports.splice(filteredExports.indexOf(_export), 1);
                 }
             }
         }
@@ -54,9 +54,19 @@ export function optimizeImports(exports: IExport[]) {
 
 // filter (ex. all exports found in the workspace) againt the active/open file in the editor
 // create a list of imports needed based on words found in the open file
-function filterExports(exports: IExport[]): IExport[] {
-    let filteredExports: IExport[] = [];
+function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
     const currentDir = path.parse(vscode.window.activeTextEditor.document.fileName).dir;
+    let filteredExports: IExport[] = [];
+    // if nontyped is set add the entry on forehand
+    // this entry is probably import only and not used yet within the document
+    if (_nonTypedEntry) {
+        const entry = containsExportedName(exports, _nonTypedEntry) || containsAsName(exports, _nonTypedEntry);
+        if (entry) {
+            const _export = cloneFromExport(currentDir, entry);
+            _export.exported.push(_nonTypedEntry);
+            filteredExports.push(_export);
+        }
+    }
     const file = {
         currentPos: vscode.window.activeTextEditor.selection.active,
         fileName: vscode.window.activeTextEditor.document.fileName,
@@ -85,24 +95,18 @@ function filterExports(exports: IExport[]): IExport[] {
                 for (let k = 0; k < exports.length; k++) {
                     // do not process exported items from this same file
                     if (exports[k].libraryName === file.libraryName) continue;
-                    if ((exports[k].type === EType.LOCAL && exports[k].exported.indexOf(_word) !== -1) ||
-                        (exports[k].type === EType.TYPING && _word === exports[k].asName) ||
-                        (exports[k].type === EType.NODE && exports[k].exported.indexOf(_word) !== -1)) {
+                    if ((exports[k].type === ExportType.LOCAL && exports[k].exported.indexOf(_word) !== -1) ||
+                        (exports[k].type === ExportType.TYPING && _word === exports[k].asName) ||
+                        (exports[k].type === ExportType.NODE && exports[k].exported.indexOf(_word) !== -1)) {
                         // check if the import was already added and this is an extra import from
                         // the same library (add it to exported) else add a new import to the list
                         let _export = containsLibraryName(filteredExports, exports[k].libraryName);
                         if (_export === null) {
-                            _export = {
-                                libraryName: exports[k].libraryName,
-                                type: exports[k].type,
-                                path: path.relative(currentDir, exports[k].path),
-                                asName: exports[k].asName,
-                                exported: []
-                            }
+                            _export = cloneFromExport(currentDir, exports[k]);
                             filteredExports.push(_export);
                         }
                         // typing is a wildcard import, no need to add submodules
-                        if (_export.type !== EType.TYPING) {
+                        if (_export.type !== ExportType.TYPING) {
                             if (_export.exported.indexOf(_word) === -1) _export.exported.push(_word);
                         }
                     }
@@ -146,7 +150,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                                 let _export: IExport = {
                                     libraryName: matches[1].toString(),
                                     path: file.path.dir,
-                                    type: EType.TYPING,
+                                    type: ExportType.TYPING,
                                     asName: asName
                                 }
                                 exports.push(_export);
@@ -167,7 +171,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                         let _export: IExport = {
                             libraryName: constructNodeLibraryName(file.path),
                             path: file.path.dir,
-                            type: EType.NODE,
+                            type: ExportType.NODE,
                             exported: []
                         }
                         for (let k = 0; k < file.lines.length; k++) {
@@ -187,7 +191,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     let _export: IExport = {
                         libraryName: file.path.name,
                         path: file.path.dir,
-                        type: EType.LOCAL,
+                        type: ExportType.LOCAL,
                         exported: []
                     }
                     for (let k = 0; k < file.lines.length; k++) {
@@ -236,19 +240,19 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
 function createImportLine(_export: IExport): string {
     let pathStringDelimiter = vscode.workspace.getConfiguration('genGetSet').get('pathStringDelimiter') || '\'';
     let txt = 'import ';
-    if (_export.type === EType.LOCAL ||
-        _export.type === EType.NODE) {
+    if (_export.type === ExportType.LOCAL ||
+        _export.type === ExportType.NODE) {
         txt += '{';
         for (let i = 0; i < _export.exported.length; i++) {
             if (i != 0) txt += ', ';
             txt += _export.exported[i];
         }
         txt += '} from ';
-        if (_export.type === EType.LOCAL)
+        if (_export.type === ExportType.LOCAL)
             txt += pathStringDelimiter + sanitizePath(_export.path, _export.libraryName) + pathStringDelimiter;
-        if (_export.type === EType.NODE)
+        if (_export.type === ExportType.NODE)
             txt += pathStringDelimiter + _export.libraryName + pathStringDelimiter;
-    } else if (_export.type === EType.TYPING) {
+    } else if (_export.type === ExportType.TYPING) {
         txt += '* as ' + _export.asName + ' from ';
         txt += pathStringDelimiter + _export.libraryName + pathStringDelimiter;
     }
@@ -284,6 +288,16 @@ function createAsName(name: string): string {
 // A bunch of functions used to easily search through the IExport[] lists
 // can probably be optimized for speed ;)
 
+function cloneFromExport(_currentDir: string, _export: IExport): IExport {
+    return {
+        libraryName: _export.libraryName,
+        type: _export.type,
+        path: path.relative(_currentDir, _export.path),
+        asName: _export.asName,
+        exported: []
+    }
+}
+
 function containsAsName(exports: IExport[], asName: string): IExport {
     for (let i = 0; i < exports.length; i++) {
         if (exports[i].asName === asName) return exports[i];
@@ -301,6 +315,15 @@ function containsLibraryName(exports: IExport[], libraryName: string): IExport {
 function containsSanitizedPath(exports: IExport[], _path: string): IExport {
     for (let i = 0; i < exports.length; i++) {
         if (sanitizePath(exports[i].path, exports[i].libraryName) === _path) return exports[i];
+    }
+    return null;
+}
+
+function containsExportedName(exports: IExport[], _name: string): IExport {
+    for (let i = 0; i < exports.length; i++) {
+        if (exports[i].exported) {
+            if (exports[i].exported.indexOf(_name) !== -1) return exports[i];
+        }
     }
     return null;
 }

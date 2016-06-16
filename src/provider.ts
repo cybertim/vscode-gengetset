@@ -1,14 +1,14 @@
-import {IExport, analyzeWorkspace} from './import';
+import {IExport, analyzeWorkspace, ExportType} from './import';
 import * as vscode from 'vscode';
 
-export class ExportsDefinitionProvider implements vscode.CompletionItemProvider {
+export class DefinitionProvider {
 
-    private static _instance: ExportsDefinitionProvider = new ExportsDefinitionProvider();
+    private static _instance: DefinitionProvider = new DefinitionProvider();
     private _cachedExports: IExport[];
     private _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
     constructor() {
-        if (ExportsDefinitionProvider._instance)
+        if (DefinitionProvider._instance)
             throw new Error("Error: Instantiation failed: Use .instance instead of new.");
         this._statusBarItem.command = 'genGetSet.popup';
         this._statusBarItem.show();
@@ -16,28 +16,11 @@ export class ExportsDefinitionProvider implements vscode.CompletionItemProvider 
         vscode.workspace.onDidSaveTextDocument((event) => {
             this.refreshExports();
         });
-        ExportsDefinitionProvider._instance = this;
+        DefinitionProvider._instance = this;
     }
 
-    public static get instance(): ExportsDefinitionProvider {
-        return ExportsDefinitionProvider._instance;
-    }
-
-    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
-        return new Promise((resolve, reject) => {
-            console.log('making list...');
-            if (this._cachedExports === null || this._cachedExports === undefined) resolve(null);
-            let items: vscode.CompletionItem[] = [];
-            for (let i = 0; i < this._cachedExports.length; i++) {
-                if (this._cachedExports[i].exported) {
-                    for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
-                        items.push(new vscode.CompletionItem(this._cachedExports[i].exported.length[j]));
-                    }
-                }
-            }
-            console.log(items.length);
-            resolve(items);
-        });
+    public static get instance(): DefinitionProvider {
+        return DefinitionProvider._instance;
     }
 
     private refreshExports() {
@@ -50,6 +33,32 @@ export class ExportsDefinitionProvider implements vscode.CompletionItemProvider 
 
     public get cachedExports(): IExport[] {
         return this._cachedExports;
+    }
+
+    public toQuickPickItemList(): Thenable<vscode.QuickPickItem[]> {
+        return new Promise((resolve, reject) => {
+            let quickPickItemList: vscode.QuickPickItem[] = [];
+            for (let i = 0; i < this._cachedExports.length; i++) {
+                if (this._cachedExports[i].libraryName) {
+                    if (this._cachedExports[i].exported) {
+                        for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
+                            quickPickItemList.push(<vscode.QuickPickItem>{
+                                label: this._cachedExports[i].exported[j],
+                                description: this._cachedExports[i].libraryName,
+                                detail: this._cachedExports[i].path
+                            });
+                        }
+                    } else {
+                        quickPickItemList.push(<vscode.QuickPickItem>{
+                            label: this._cachedExports[i].asName,
+                            description: this._cachedExports[i].libraryName,
+                            detail: this._cachedExports[i].path
+                        });
+                    }
+                }
+            }
+            resolve(quickPickItemList);
+        });
     }
 
 }

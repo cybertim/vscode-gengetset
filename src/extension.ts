@@ -1,20 +1,25 @@
-import {ExportsDefinitionProvider} from './provider';
+import {DefinitionProvider} from './provider';
 import {optimizeImports, analyzeWorkspace, IExport} from './import';
 import {generateCode, generateClassesList, quickPickItemListFrom, EType} from './getset';
 import * as vscode from 'vscode';
 
-const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript', scheme: 'file' }
+const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript' }
 
 export function activate(context: vscode.ExtensionContext) {
-
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        TYPESCRIPT, ExportsDefinitionProvider.instance));
-
-    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.import', function () {
-        if (ExportsDefinitionProvider.instance.cachedExports === null ||
-            ExportsDefinitionProvider.instance.cachedExports === undefined)
+    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.addImport', function () {
+        if (DefinitionProvider.instance.cachedExports === null ||
+            DefinitionProvider.instance.cachedExports === undefined)
             vscode.window.showWarningMessage('Sorry, please wait a few seconds longer until the export cache has been build.');
-        optimizeImports(ExportsDefinitionProvider.instance.cachedExports);
+        vscode.window.showQuickPick(
+            DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
+                optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
+            });
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.sortImports', function () {
+        if (DefinitionProvider.instance.cachedExports === null ||
+            DefinitionProvider.instance.cachedExports === undefined)
+            vscode.window.showWarningMessage('Sorry, please wait a few seconds longer until the export cache has been build.');
+        optimizeImports(DefinitionProvider.instance.cachedExports);
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.getter', function () {
         const classesList = generateClassesList(EType.GETTER);
@@ -44,28 +49,34 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.popup', function () {
         vscode.window.showQuickPick([
             <vscode.QuickPickItem>{
+                label: 'Add Import',
+                description: 'add and search through available imports'
+            },
+            <vscode.QuickPickItem>{
                 label: 'Optimize Imports',
-                description: 'import {...} from'
+                description: 'sort and import missing libraries'
             },
             <vscode.QuickPickItem>{
                 label: 'Constructor',
-                description: 'public constructor(...)'
+                description: 'generate a constructor based on privates'
             },
             <vscode.QuickPickItem>{
                 label: 'Getter and Setter',
-                description: 'both public get and set <name> (...)'
+                description: 'generate a getter and setter public function'
             },
             <vscode.QuickPickItem>{
                 label: 'Getter',
-                description: 'public get <name>'
+                description: 'generate a getter public function'
             },
             <vscode.QuickPickItem>{
                 label: 'Setter',
-                description: 'public set <name> (...)'
+                description: 'generate a setter public function'
             }
         ]).then((result) => {
-            if (result && result.label.indexOf('Optimize Imports') !== -1) {
-                vscode.commands.executeCommand('genGetSet.import');
+            if (result && result.label.indexOf('Add Import') !== -1) {
+                vscode.commands.executeCommand('genGetSet.addImport');
+            } else if (result && result.label.indexOf('Optimize Imports') !== -1) {
+                vscode.commands.executeCommand('genGetSet.sortImports');
             } else if (result && result.label.indexOf('Getter and Setter') !== -1) {
                 vscode.commands.executeCommand('genGetSet.getterAndSetter');
             } else if (result && result.label.indexOf('Getter') !== -1) {
