@@ -64,7 +64,7 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
         if (entry) {
             const _export = cloneFromExport(currentDir, entry);
             _export.exported.push(_nonTypedEntry);
-            filteredExports.push(_export);
+            if (_export) filteredExports.push(_export);
         }
     }
     const file = {
@@ -103,7 +103,7 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
                         let _export = containsLibraryName(filteredExports, exports[k].libraryName);
                         if (_export === null) {
                             _export = cloneFromExport(currentDir, exports[k]);
-                            filteredExports.push(_export);
+                            if (_export) filteredExports.push(_export);
                         }
                         // typing is a wildcard import, no need to add submodules
                         if (_export.type !== ExportType.TYPING) {
@@ -142,7 +142,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     for (let k = 0; k < file.lines.length; k++) {
                         const line = file.lines[k];
                         const matches = line.match(matchers.typings);
-                        if (matches) {
+                        if (matches && matches[1]) {
                             const asName = createAsName(matches[1].toString());
                             // don't add doubles (can happen) this is not yet supported
                             // TODO: make the system understand doubles (popup menu selection?)
@@ -248,10 +248,18 @@ function createImportLine(_export: IExport): string {
             txt += _export.exported[i];
         }
         txt += '} from ';
+        let p;
         if (_export.type === ExportType.LOCAL)
-            txt += pathStringDelimiter + sanitizePath(_export.path, _export.libraryName) + pathStringDelimiter;
+            p = sanitizePath(_export.path, _export.libraryName);
         if (_export.type === ExportType.NODE)
-            txt += pathStringDelimiter + _export.libraryName + pathStringDelimiter;
+            p = _export.libraryName;
+        // sometimes exports are not correct due to the underlaying system
+        // if 'p' is null this is a string indication :-)
+        if (p) {
+            txt += pathStringDelimiter + p + pathStringDelimiter;
+        } else {
+            return;
+        }
     } else if (_export.type === ExportType.TYPING) {
         txt += '* as ' + _export.asName + ' from ';
         txt += pathStringDelimiter + _export.libraryName + pathStringDelimiter;
@@ -289,13 +297,17 @@ function createAsName(name: string): string {
 // can probably be optimized for speed ;)
 
 function cloneFromExport(_currentDir: string, _export: IExport): IExport {
-    return {
-        libraryName: _export.libraryName,
-        type: _export.type,
-        path: path.relative(_currentDir, _export.path),
-        asName: _export.asName,
-        exported: []
+    const _path = path.relative(_currentDir, _export.path);
+    if (_path !== null && _path !== 'null') {
+        return {
+            libraryName: _export.libraryName,
+            type: _export.type,
+            path: _path,
+            asName: _export.asName,
+            exported: []
+        }
     }
+    return null;
 }
 
 function containsAsName(exports: IExport[], asName: string): IExport {
