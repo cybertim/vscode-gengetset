@@ -1,15 +1,25 @@
 # Optimize Imports, Generate Getters / Setters and Constructors
 
+**Easily create a contructor based on privates.**
+
 ![Constructor](demo_constructor.gif)
-Easily create a contructor based on privates.
+
+**Quickly generate getters and setters for your class.**
+
 ![GetSet](demo_getset.gif)
-Quickly generate getters and setters for your class.
+
+**Search all available exported functions and classes quickly and generate the import line...**
+
 ![Import](demo_import.gif)
-Search all available exported functions and classes quickly and generate the import line...
+
+**Or just use exported functions and classes from memory and quickly generate all import lines.**
+
 ![Optimize](demo_optimize.gif)
-Or just use exported functions and classes from memory and quickly generate all import lines.
+
+**Keep an eye on the eye-icon for quick info about the exports found.**
+
 ![Status](demo_status.gif)
-Keep an eye on the eye-icon for quick info about the exports found.
+
 
 ## Changelog
 
