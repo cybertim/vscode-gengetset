@@ -14,8 +14,13 @@ export interface IExport {
     asName?: string;
 }
 
+//
+// the 'magic numbers' which make this extension possible :-)
+//
 // a quick list of keywords we probably want to skip asap.
-const commonKeywordList: string[] = ['from', 'null', 'return', 'get', 'set', 'boolean', 'string', 'if', 'var', 'let', 'const', 'for', 'public', 'class', 'interface', 'new', 'import', 'as', 'private', 'while', 'case', 'switch', 'this', 'function', 'enum'];
+const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', 'return', 'get', 'set', 'boolean', 'string', 'if', 'var', 'let', 'const', 'for', 'public', 'class', 'interface', 'new', 'import', 'as', 'private', 'while', 'case', 'switch', 'this', 'function', 'enum'];
+// start strings which can be ignored in ts files because they are most likely part of a function/class and will obfuscate the overview
+const commonKeywordStartsWith: string[] = ['cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends'];
 // all regexp matchers we use to analyze typescript documents
@@ -27,6 +32,9 @@ const matchers = {
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
 }
 
+// search for keywords in the active document and match them with all indexed exports
+// filter the list till there are only 'imports' left which we need for this active doc
+// optional: add a single non mentioned 'nontype' and it will be mixed with the optimize
 export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
     const filteredExports = filterExports(exports, nonTypedEntry);
     vscode.window.activeTextEditor.edit((builder) => {
@@ -59,6 +67,7 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
     let filteredExports: IExport[] = [];
     // if nontyped is set add the entry on forehand
     // this entry is probably import only and not used yet within the document
+    // (ex. aded with the add-import menu function)
     if (_nonTypedEntry) {
         const entry = containsExportedName(exports, _nonTypedEntry) || containsAsName(exports, _nonTypedEntry);
         if (entry) {
@@ -86,7 +95,7 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
             // only process unquoted words which are not listed in the commonList
             if (matches[j].indexOf('\'') === -1 &&
                 matches[j].indexOf('\"') === -1 &&
-                commonKeywordList.indexOf(matches[j]) === -1) {
+                checkIfValid(matches[j])) {
                 // split method calls based on the dot, no need to sub-minimatch
                 // we use intellisens for that :)
                 const splitted = matches[j].split('.');
@@ -177,7 +186,8 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                         for (let k = 0; k < file.lines.length; k++) {
                             const line = file.lines[k];
                             const matches = line.match(matchers.node);
-                            if (matches) {
+                            if (matches &&
+                                checkIfValid(matches[1])) {
                                 _export.exported.push(matches[1]);
                             }
                         }
@@ -197,7 +207,8 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     for (let k = 0; k < file.lines.length; k++) {
                         const line = file.lines[k];
                         const matches = line.match(matchers.exports);
-                        if (matches) {
+                        if (matches &&
+                            checkIfValid(matches[2])) {
                             _export.exported.push(matches[2]);
                         }
                     }
@@ -293,8 +304,17 @@ function createAsName(name: string): string {
     return asname;
 }
 
-// A bunch of functions used to easily search through the IExport[] lists
-// can probably be optimized for speed ;)
+function checkIfValid(word: string): boolean {
+    if (commonKeywordList.indexOf(word) === -1) {
+        for (let i = 0; i < commonKeywordStartsWith.length; i++) {
+            if (word.startsWith(commonKeywordStartsWith[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
 
 function cloneFromExport(_currentDir: string, _export: IExport): IExport {
     const _path = path.relative(_currentDir, _export.path);
@@ -309,6 +329,9 @@ function cloneFromExport(_currentDir: string, _export: IExport): IExport {
     }
     return null;
 }
+
+// A bunch of functions used to easily search through the IExport[] lists
+// can probably be optimized for speed ;)
 
 function containsAsName(exports: IExport[], asName: string): IExport {
     for (let i = 0; i < exports.length; i++) {

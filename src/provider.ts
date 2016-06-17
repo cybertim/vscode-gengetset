@@ -44,15 +44,13 @@ export class DefinitionProvider {
                         for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
                             quickPickItemList.push(<vscode.QuickPickItem>{
                                 label: this._cachedExports[i].exported[j],
-                                description: this._cachedExports[i].libraryName,
-                                detail: this._cachedExports[i].path
+                                description: this._cachedExports[i].libraryName
                             });
                         }
                     } else {
                         quickPickItemList.push(<vscode.QuickPickItem>{
                             label: this._cachedExports[i].asName,
-                            description: this._cachedExports[i].libraryName,
-                            detail: this._cachedExports[i].path
+                            description: this._cachedExports[i].libraryName
                         });
                     }
                 }

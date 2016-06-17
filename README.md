@@ -1,8 +1,22 @@
 # Optimize Imports, Generate Getters / Setters and Constructors
 
-![Demo](demo.gif)
+![Constructor](demo_constructor.gif)
+Easily create a contructor based on privates.
+![GetSet](demo_getset.gif)
+Quickly generate getters and setters for your class.
+![Import](demo_import.gif)
+Search all available exported functions and classes quickly and generate the import line...
+![Optimize](demo_optimize.gif)
+Or just use exported functions and classes from memory and quickly generate all import lines.
+![Status](demo_status.gif)
+Keep an eye on the eye-icon for quick info about the exports found.
 
 ## Changelog
+
+### v0.3.1
++ introducting the statusbar Eye-Icon shwowing the status of the extension (searching for and exports found)
++ solution for searching through and adding one of the available exports: `Add Import`
++ and fixed reported issues
 
 ### v0.3.0
 + complete optimized code rewrite of the extension
