@@ -24,15 +24,15 @@
 ## Changelog
 
 ### v0.3.1
-+ introducting the statusbar Eye-Icon shwowing the status of the extension (searching for and exports found)
++ introducing the statusbar Eye-Icon showing the status of the extension (searching for and exports found)
 + solution for searching through and adding one of the available exports: `Add Import`
-+ and fixed reported issues
++ ..and a bunch of fixed reported issues
 
 ### v0.3.0
 + complete optimized code rewrite of the extension
 + now with support for TypeScript based modules (ex. Ionic 2 and Angular 2)
 + import paths `/` are now completly OS independend
-- intellisense suggestions have been removed (searching for other solution)
++ intellisense suggestions have been removed (searching for other solution)
 + and lots of small open issues have been fixed and/or optimized
 
 ## Install
@@ -51,14 +51,18 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 
 1. Just place your cursor within a TypeScript class definition in the text editor window
 2. Open the command palette `ctrl+shift+P` / `cmd+shift+P`.
-3. Search for 'Generate Getter', 'Setter' or 'Constructor'
-4. Select the private variable you would like to generate
+3. Search for 'Import', 'Generate Getter', 'Setter' or 'Constructor'
 
 or
 
 1. Just place your cursor within a TypeScript class definition in the text editor window
-2. Press `alt+shift+G` for a quick selection
-3. Select the private variable you would like to generate (or constructor)
+2. Press `alt+shift+G` for a quick selection pop-up
+3. Select the preferred function from the pop-up menu
+
+or
+
+1. Click on the little Eye-Icon in your statusbar
+2. Select the preferred function from the pop-up menu
 
 The generated method will be placed at the cursors position.
 
