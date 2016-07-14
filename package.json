@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript",
     "description": "Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -45,23 +45,27 @@
         "commands": [
             {
                 "command": "genGetSet.getter",
-                "title": "Generate Getter"
+                "title": "TypeScript: Generate Getter"
             },
             {
                 "command": "genGetSet.setter",
-                "title": "Generate Setter"
+                "title": "TypeScript: Generate Setter"
             },
             {
                 "command": "genGetSet.getterAndSetter",
-                "title": "Generate Getter and Setter"
+                "title": "TypeScript: Generate Getter and Setter"
             },
             {
                 "command": "genGetSet.constructor",
-                "title": "Generate Constructor"
+                "title": "TypeScript: Generate Constructor"
             },
             {
-                "command": "genGetSet.import",
-                "title": "Optimize Imports"
+                "command": "genGetSet.sortImports",
+                "title": "TypeScript: Optimize Imports"
+            },
+            {
+                "command": "genGetSet.addImport",
+                "title": "TypeScript: Add Import"
             }
         ],
         "configuration": {

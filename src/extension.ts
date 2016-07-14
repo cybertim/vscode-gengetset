@@ -5,21 +5,37 @@ import * as vscode from 'vscode';
 
 const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript' }
 
+function readyCheck() {
+    if (vscode.window.activeTextEditor === undefined) {
+        vscode.window.showWarningMessage(
+            'Need an active TypeScript document opened in the editor to function.');
+        return false;
+    }
+    if (DefinitionProvider.instance.cachedExports === null ||
+        DefinitionProvider.instance.cachedExports === undefined) {
+        vscode.window.showWarningMessage(
+            'Please wait a few seconds longer until the export cache has been build.',
+            'Refresh').then((r) => {
+                DefinitionProvider.instance.refreshExports();
+            });
+        return false;
+    }
+    return true;
+}
+
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.addImport', function () {
-        if (DefinitionProvider.instance.cachedExports === null ||
-            DefinitionProvider.instance.cachedExports === undefined)
-            vscode.window.showWarningMessage('Sorry, please wait a few seconds longer until the export cache has been build.');
-        vscode.window.showQuickPick(
-            DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
-                optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
-            });
+        if (readyCheck()) {
+            vscode.window.showQuickPick(
+                DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
+                    optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
+                });
+        }
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.sortImports', function () {
-        if (DefinitionProvider.instance.cachedExports === null ||
-            DefinitionProvider.instance.cachedExports === undefined)
-            vscode.window.showWarningMessage('Sorry, please wait a few seconds longer until the export cache has been build.');
-        optimizeImports(DefinitionProvider.instance.cachedExports);
+        if (readyCheck()) {
+            optimizeImports(DefinitionProvider.instance.cachedExports);
+        }
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.getter', function () {
         const classesList = generateClassesList(EType.GETTER);

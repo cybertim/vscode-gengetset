@@ -23,6 +23,10 @@
 
 ## Changelog
 
+### v0.3.2
++ fixed `@angular` related import optimizations
++ fixed command palette issues
+
 ### v0.3.1
 + introducing the statusbar Eye-Icon showing the status of the extension (searching for and exports found)
 + solution for searching through and adding one of the available exports: `Add Import`
@@ -31,7 +35,7 @@
 ### v0.3.0
 + complete optimized code rewrite of the extension
 + now with support for TypeScript based modules (ex. Ionic 2 and Angular 2)
-+ import paths `/` are now completly OS independend
++ import paths `/` are now completely OS independent
 + intellisense suggestions have been removed (searching for other solution)
 + and lots of small open issues have been fixed and/or optimized
 

@@ -133,6 +133,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
         const includeNode = vscode.workspace.getConfiguration('genGetSet').get('importNode');
         const includeTypings = vscode.workspace.getConfiguration('genGetSet').get('importTypings');
         vscode.workspace.findFiles('**/*.ts', '').then((files) => {
+            if (files === undefined) return reject();
             let exports: IExport[] = [];
             for (let i = 0; i < files.length; i++) {
                 // globally analyze the found .ts file and load all data for

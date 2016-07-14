@@ -6,6 +6,7 @@ export class DefinitionProvider {
     private static _instance: DefinitionProvider = new DefinitionProvider();
     private _cachedExports: IExport[];
     private _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    private _refreshing: boolean = false;
 
     constructor() {
         if (DefinitionProvider._instance)
@@ -23,12 +24,19 @@ export class DefinitionProvider {
         return DefinitionProvider._instance;
     }
 
-    private refreshExports() {
-        this._statusBarItem.text = '$(eye) $(sync)';
-        analyzeWorkspace().then((exports) => {
-            this._cachedExports = exports;
-            this._statusBarItem.text = '$(eye) ' + exports.length;
-        });
+    public refreshExports() {
+        if (!this._refreshing) {
+            this._refreshing = true;
+            this._statusBarItem.text = '$(eye) $(sync)';
+            analyzeWorkspace().then((exports) => {
+                this._refreshing = false;
+                this._cachedExports = exports;
+                this._statusBarItem.text = '$(eye) ' + exports.length;
+            }, (err) => { 
+                this._refreshing = false;
+                this._statusBarItem.text = '';
+            });
+        }
     }
 
     public get cachedExports(): IExport[] {
