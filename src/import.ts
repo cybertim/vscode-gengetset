@@ -27,7 +27,7 @@ const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backen
 const matchers = {
     commonWords: /([.?_:\'\"a-zA-Z0-9]{2,})/g,
     exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
-    imports: /import[\s]+[\*\{]*[\s]*[a-zA-Z\,\s]*[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
+    imports: /import[\s]+[\*\{]*[\s]*([a-zA-Z\_\,\s]*)[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
     node: /export[\s]+declare[\s]+[a-zA-Z]+[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\:]?[\s]?/,
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
 }
@@ -44,12 +44,18 @@ export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
             const line = vscode.window.activeTextEditor.document.lineAt(i);
             const matches = line.text.match(matchers.imports);
             if (matches) {
-                let _export = containsLibraryName(filteredExports, matches[1]) || containsSanitizedPath(filteredExports, matches[1]);
+                const _export = containsLibraryName(filteredExports, matches[2]) || containsSanitizedPath(filteredExports, matches[2]);
                 if (_export !== null) {
                     const range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                     builder.replace(range, createImportLine(_export));
-                    // remove this element from the list
+                    // remove the updated import line from the list ...
                     filteredExports.splice(filteredExports.indexOf(_export), 1);
+                    // ... and search for seperate libraryNames with the same exports and remove them (ex. angular has deprecated doubles)
+                    const exportedNameList = matches[1].split(',').map(item => item.trim());
+                    exportedNameList.forEach((name) => {
+                        const _export = containsExportedName(filteredExports, name)
+                        if (_export) filteredExports.splice(filteredExports.indexOf(_export), 1);
+                    });
                 }
             }
         }
