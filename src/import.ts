@@ -26,7 +26,7 @@ const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backen
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
     commonWords: /([.?_:\'\"a-zA-Z0-9]{2,})/g,
-    exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
+    exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|type|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
     imports: /import[\s]+[\*\{]*[\s]*([a-zA-Z\_\,\s]*)[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
     node: /export[\s]+declare[\s]+[a-zA-Z]+[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\:]?[\s]?/,
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
