@@ -91,9 +91,11 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
     }
     for (let i = 0; i < file.lineCount; i++) {
         // quick filters to skip lines fast without analyzing
+        // import lines, comment lines or continues comment lines (wildcards) can be quick skipped.
+        // no need to spend our precious cpu cycles :-)
         if (vscode.window.activeTextEditor.document.lineAt(i).isEmptyOrWhitespace) continue;
         let line = vscode.window.activeTextEditor.document.lineAt(i).text.trim();
-        if (line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) continue;
+        if (line.startsWith('import') || line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) continue;
         if (line.indexOf('//') !== -1) line = line.split('//')[0];
         const matches = line.match(matchers.commonWords);
         if (!matches) continue;

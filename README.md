@@ -23,6 +23,10 @@
 
 ## Changelog
 
+### v0.3.3
++ new name and icon ;-)
++ resolved some issues eg. reported on github
+
 ### v0.3.2
 + fixed `@angular` related import optimizations
 + fixed command palette issues
@@ -112,6 +116,6 @@ This is a TypeScript only extension.
 
 ## Contributors
 Special thanks to the github users:
-AngelMunoz, edotassi, Aranir
+AngelMunoz, edotassi, Aranir, buehler
 
 **Enjoy!**

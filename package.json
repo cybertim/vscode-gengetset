@@ -1,12 +1,12 @@
 {
     "name": "vscode-generate-getter-setter",
-    "displayName": "TypeScript",
-    "description": "Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.3.2",
+    "displayName": "TypeScript Toolbox",
+    "description": "Add and Optimize Imports, Generate Getters / Setters and Constructors",
+    "version": "0.3.3",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
-        "color": "#5c2d91",
+        "color": "#d4d3d3",
         "theme": "dark"
     },
     "engines": {

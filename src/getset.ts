@@ -29,7 +29,7 @@ const matchers = {
 // generate code lines into the current active window based on EType
 export function generateCode(classes: IClass[], type: EType, pickedItem?: vscode.QuickPickItem) {
     const currentPos = new vscode.Position(vscode.window.activeTextEditor.selection.active.line, 0);
-    if (type !== EType.CONSTRUCTOR) {
+    if (type !== EType.CONSTRUCTOR && pickedItem) {
         const _class = getClass(classes, pickedItem.description);
         if (_class) {
             for (let i = 0; i < _class.vars.length; i++) {
@@ -45,7 +45,7 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vscode
                 }
             }
         }
-    } else {
+    } else if (type === EType.CONSTRUCTOR) {
         vscode.window.activeTextEditor.edit((builder) => {
             for (let i = 0; i < classes.length; i++) {
                 if (currentPos.isAfterOrEqual(classes[i].startPos) || currentPos.isBeforeOrEqual(classes[i].endPos)) {
