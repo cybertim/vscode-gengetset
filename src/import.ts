@@ -25,8 +25,9 @@ const commonKeywordStartsWith: string[] = ['cancel', 'build', 'finish', 'merge',
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends'];
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
+    explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
     commonWords: /([.?_:\'\"a-zA-Z0-9]{2,})/g,
-    exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
+    exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|type|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
     imports: /import[\s]+[\*\{]*[\s]*([a-zA-Z\_\,\s]*)[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
     node: /export[\s]+declare[\s]+[a-zA-Z]+[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\:]?[\s]?/,
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
@@ -194,7 +195,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                             const line = file.lines[k];
                             const matches = line.match(matchers.node);
                             if (matches &&
-                                checkIfValid(matches[1])) {
+                                checkIfValid(matches[1], line)) {
                                 _export.exported.push(matches[1]);
                             }
                         }
@@ -215,7 +216,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                         const line = file.lines[k];
                         const matches = line.match(matchers.exports);
                         if (matches &&
-                            checkIfValid(matches[2])) {
+                            checkIfValid(matches[2], line)) {
                             _export.exported.push(matches[2]);
                         }
                     }
@@ -311,10 +312,11 @@ function createAsName(name: string): string {
     return asname;
 }
 
-function checkIfValid(word: string): boolean {
+function checkIfValid(word: string, line?: string): boolean {
+    let explicitMatch = line ? line.match(matchers.explicitExport) : null;
     if (commonKeywordList.indexOf(word) === -1) {
         for (let i = 0; i < commonKeywordStartsWith.length; i++) {
-            if (word.startsWith(commonKeywordStartsWith[i])) {
+            if (word.startsWith(commonKeywordStartsWith[i]) && !explicitMatch) {
                 return false;
             }
         }
