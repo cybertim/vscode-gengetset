@@ -20,7 +20,7 @@ export interface IExport {
 // a quick list of keywords we probably want to skip asap.
 const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', 'return', 'get', 'set', 'boolean', 'string', 'if', 'var', 'let', 'const', 'for', 'public', 'class', 'interface', 'new', 'import', 'as', 'private', 'while', 'case', 'switch', 'this', 'function', 'enum'];
 // start strings which can be ignored in ts files because they are most likely part of a function/class and will obfuscate the overview
-const commonKeywordStartsWith: string[] = ['cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
+const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends'];
 // all regexp matchers we use to analyze typescript documents
@@ -262,16 +262,17 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
 // build the import line based on the given IExport
 // there is a custom setting for using ' or "
 function createImportLine(_export: IExport): string {
+    let spacedImportLine = vscode.workspace.getConfiguration('genGetSet').get('spacedImportLine');
     let pathStringDelimiter = vscode.workspace.getConfiguration('genGetSet').get('pathStringDelimiter') || '\'';
     let txt = 'import ';
     if (_export.type === ExportType.LOCAL ||
         _export.type === ExportType.NODE) {
-        txt += '{';
+        txt += '{' + (spacedImportLine ? ' ' : '');
         for (let i = 0; i < _export.exported.length; i++) {
             if (i != 0) txt += ', ';
             txt += _export.exported[i];
         }
-        txt += '} from ';
+        txt += (spacedImportLine ? ' ' : '') + '} from ';
         let p;
         if (_export.type === ExportType.LOCAL)
             p = sanitizePath(_export.path, _export.libraryName);

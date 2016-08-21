@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Toolbox",
     "description": "Add and Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -101,6 +101,11 @@
                     "type": "string",
                     "default": "'",
                     "description": "Sets which quote use to generate import path."
+                },
+                "genGetSet.spacedImportLine": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Adds spaces between the beginning and ending of the brackets in an import line."
                 }
             }
         }

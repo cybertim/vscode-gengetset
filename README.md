@@ -23,6 +23,10 @@
 
 ## Changelog
 
+### v0.3.4
++ Windows users can now finally use the optimize import function
++ added the setting `spacedImportLine`
+
 ### v0.3.3
 + new name and icon ;-)
 + resolved some issues eg. reported on github
@@ -54,6 +58,7 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 3. `genGetSet.importNode` (default: enabled) Create import lines based on definition files from /node_modules/.
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
+5. `genGetSet.spacedImportLine` (default: false) Adds spaces between the beginning and ending of the brackets in an import line.
 
 ## Usage
 
