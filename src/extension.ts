@@ -28,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (readyCheck()) {
             vscode.window.showQuickPick(
                 DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
+                    if (!pickedItem) return;
                     optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
                 });
         }
