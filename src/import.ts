@@ -27,9 +27,8 @@ const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backen
 const matchers = {
     explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
     commonWords: /([.?_:\'\"a-zA-Z0-9]{2,})/g,
-    exports: /export[\s]+[\s]?[\=]?[\s]?(function|class|type|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
+    exports: /export[\s]+[\s]?[\=]?[\s]?(function|declare|abstract|class|type|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
     imports: /import[\s]+[\*\{]*[\s]*([a-zA-Z\_\,\s]*)[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
-    node: /export[\s]+declare[\s]+[a-zA-Z]+[\s]+([a-zA-Z_$][0-9a-zA-Z_$]*)[\:]?[\s]?/,
     typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
 }
 
@@ -195,10 +194,10 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                         }
                         for (let k = 0; k < file.lines.length; k++) {
                             const line = file.lines[k];
-                            const matches = line.match(matchers.node);
+                            const matches = line.match(matchers.exports);
                             if (matches &&
-                                checkIfValid(matches[1], line)) {
-                                _export.exported.push(matches[1]);
+                                checkIfValid(matches[2], line)) {
+                                _export.exported.push(matches[2]);
                             }
                         }
                         exports.push(_export);
@@ -240,12 +239,16 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
     const tree = _path.dir.split(path.sep);
     const node = tree.indexOf('node_modules') + 1;
     for (let i = tree.length; i >= node; i--) {
-        let constructedPath = '/';
+        let constructedPath = path.sep === '/' ? path.sep : '';
         for (let j = 0; j < i; j++) {
             constructedPath = constructedPath + tree[j] + '/';
         }
-        let files = fs.readdirSync(constructedPath);
-        if (files.indexOf('index.d.ts') !== -1) {
+        let files = null;
+        try { files = fs.readdirSync(constructedPath); } catch (err) {
+            console.log('! path not found: ', constructedPath);
+            continue;
+        }
+        if (files && files.indexOf('index.d.ts') !== -1) {
             let returnPath = '';
             for (let j = node; j < i; j++) {
                 returnPath = returnPath + (returnPath === '' ? '' : '/') + tree[j];
