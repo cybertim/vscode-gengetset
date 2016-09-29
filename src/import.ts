@@ -23,6 +23,8 @@ const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', '
 const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends'];
+// all directories to ignore while looking through project
+const commonIgnoreDirectories: string[] = ['.history'];
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
     explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
@@ -205,6 +207,14 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                 } else if (!file.dts &&
                     file.path.dir.indexOf('node_modules/') === -1 &&
                     file.path.dir.indexOf('typings/') === -1) {
+
+                    let containsIgnoredDirectory = false;
+                    for (let directory of commonIgnoreDirectories) {
+                        if (file.path.dir.indexOf(directory) !== -1) containsIgnoredDirectory = true;
+                    }
+
+                    if (containsIgnoredDirectory) continue;
+                  
                     // Process local .ts files
                     // these are your own source files who import by path
                     let _export: IExport = {
