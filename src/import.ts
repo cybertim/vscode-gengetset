@@ -22,7 +22,7 @@ const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', '
 // start strings which can be ignored in ts files because they are most likely part of a function/class and will obfuscate the overview
 const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
-const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends'];
+const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends', 'es2015', 'umd'];
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
     explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
@@ -152,6 +152,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     dts: files[i].fsPath.endsWith('.d.ts')
                 }
                 // analyze files based on their EType
+                // TODO: Typings is now ALSO deprecated - remove later on?
                 if (file.dts &&
                     file.path.dir.indexOf('typings' + path.sep) !== -1 &&
                     includeTypings) {
@@ -186,6 +187,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     // Process node_modules like Angular2 etc.
                     // these libraries contain their own d.ts files with 'export declares'
                     if (validPath) {
+                        if (file.path.dir.indexOf('trans') !== -1) console.log(constructNodeLibraryName(file.path), file.path.dir);
                         let _export: IExport = {
                             libraryName: constructNodeLibraryName(file.path),
                             path: file.path.dir,
@@ -204,6 +206,7 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     }
                 } else if (!file.dts &&
                     file.path.dir.indexOf('node_modules/') === -1 &&
+                    file.path.dir.indexOf(path.sep + '.') === -1 &&
                     file.path.dir.indexOf('typings/') === -1) {
                     // Process local .ts files
                     // these are your own source files who import by path
@@ -238,16 +241,27 @@ export function analyzeWorkspace(): Promise<IExport[]> {
 function constructNodeLibraryName(_path: path.ParsedPath): string {
     const tree = _path.dir.split(path.sep);
     const node = tree.indexOf('node_modules') + 1;
+    let lastPathWithDTS = null;
     for (let i = tree.length; i >= node; i--) {
         let constructedPath = path.sep === '/' ? path.sep : '';
         for (let j = 0; j < i; j++) {
             constructedPath = constructedPath + tree[j] + '/';
         }
+        if (constructedPath.indexOf(path.sep + 'src' + path.sep) !== -1) continue;
         let files = null;
         try { files = fs.readdirSync(constructedPath); } catch (err) {
             console.log('! path not found: ', constructedPath);
             continue;
         }
+        files.forEach(file => {
+            if (file.indexOf('.d.ts') !== -1) {
+                lastPathWithDTS = '';
+                for (let j = node; j < i; j++) {
+                    lastPathWithDTS = lastPathWithDTS + (lastPathWithDTS === '' ? '' : '/') + tree[j];
+                }
+                lastPathWithDTS = lastPathWithDTS + '/' + file.split('.d.ts')[0];
+            }
+        });
         if (files && files.indexOf('index.d.ts') !== -1) {
             let returnPath = '';
             for (let j = node; j < i; j++) {
@@ -256,7 +270,9 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
             return returnPath;
         }
     }
-    return null;
+    // nothing found lets search the base path for a nice .d.ts file and return that
+    // works in most other cases :-)
+    return lastPathWithDTS;
 }
 
 // build the import line based on the given IExport
