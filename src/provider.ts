@@ -14,9 +14,14 @@ export class DefinitionProvider {
         this._statusBarItem.command = 'genGetSet.popup';
         this._statusBarItem.show();
         this.refreshExports();
-        vscode.workspace.onDidSaveTextDocument((event) => {
-            this.refreshExports();
-        });
+
+        const scanOnSave = vscode.workspace.getConfiguration('genGetSet').get('scanOnSave');
+        if (scanOnSave) {
+            vscode.workspace.onDidSaveTextDocument((event) => {
+                this.refreshExports();
+            });
+        }
+
         DefinitionProvider._instance = this;
     }
 
@@ -32,7 +37,7 @@ export class DefinitionProvider {
                 this._refreshing = false;
                 this._cachedExports = exports;
                 this._statusBarItem.text = '$(eye) ' + exports.length;
-            }, (err) => { 
+            }, (err) => {
                 this._refreshing = false;
                 this._statusBarItem.text = '';
             });

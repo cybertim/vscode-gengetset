@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Toolbox",
     "description": "Add and Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.3.4",
+    "version": "0.4.0",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -31,6 +31,7 @@
         "onCommand:genGetSet.popup",
         "onCommand:genGetSet.addImport",
         "onCommand:genGetSet.sortImports",
+        "onCommand:genGetSet.scanImports",
         "onLanguage:typescript"
     ],
     "main": "./out/src/extension",
@@ -66,6 +67,10 @@
             {
                 "command": "genGetSet.addImport",
                 "title": "TypeScript: Add Import"
+            },
+            {
+                "command": "genGetSet.scanImport",
+                "title": "TypeScript: (Re)Scan Exports"
             }
         ],
         "configuration": {
@@ -106,6 +111,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Adds spaces between the beginning and ending of the brackets in an import line."
+                },
+                "genGetSet.scanOnSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Index all exports in the workspace when a change is saved."
                 }
             }
         }

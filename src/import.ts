@@ -23,13 +23,15 @@ const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', '
 const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends', 'es2015', 'umd'];
+// all library (node_modules) paths which should always be ignored
+const commonIgnoreLibraryPaths: string[] = ['src', 'dist'];
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
     explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
     commonWords: /([.?_:\'\"a-zA-Z0-9]{2,})/g,
     exports: /export[\s]+[\s]?[\=]?[\s]?(function|declare|abstract|class|type|interface|var|let|const|enum|[\s]+)*([a-zA-Z_$][0-9a-zA-Z_$]*)[\:|\(|\s|\;\<]/,
     imports: /import[\s]+[\*\{]*[\s]*([a-zA-Z\_\,\s]*)[\s]*[\}]*[\s]*from[\s]*[\'\"]([\S]*)[\'|\"]+/,
-    typings: /declare[\s]+module[\s]+[\"|\']+([\S]*)[\"|\']+/
+    typings: /declare[\s]+module[\s]+[\"|\']?([a-zA-Z_]*)[\"|\']?/
 }
 
 // search for keywords in the active document and match them with all indexed exports
@@ -134,6 +136,10 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
     return filteredExports;
 }
 
+function readLines(file:vscode.Uri) {
+    return fs.readFileSync(file.fsPath).toString().split(/(\r?\n)/g);
+}
+
 // analyze all typescript (.ts) files within the workspace including
 // node_modules and typings, this is promised and runs in he background
 export function analyzeWorkspace(): Promise<IExport[]> {
@@ -148,7 +154,6 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                 // a line to line analyzes
                 const file = {
                     path: path.parse(files[i].fsPath),
-                    lines: fs.readFileSync(files[i].fsPath).toString().split(/(\r?\n)/g),
                     dts: files[i].fsPath.endsWith('.d.ts')
                 }
                 // analyze files based on their EType
@@ -158,8 +163,9 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     includeTypings) {
                     // Process d.ts files from the Typings directory
                     // they describe pure javascript node_modules with a 'module' tag
-                    for (let k = 0; k < file.lines.length; k++) {
-                        const line = file.lines[k];
+                    const lines = readLines(files[i]);
+                    for (let k = 0; k < lines.length; k++) {
+                        const line = lines[k];
                         const matches = line.match(matchers.typings);
                         if (matches && matches[1]) {
                             const asName = createAsName(matches[1].toString());
@@ -176,10 +182,33 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                             }
                         }
                     }
+                } else if (file.dts && file.path.dir.indexOf('@types' + path.sep) !== -1) {
+                    // search the @types index file for a module name (first hit wins, like with lodash it is '_')
+                    // if there is NO match use the name of the library itself
+                    let asName = null;
+                    let libraryName = file.path.dir.substring(file.path.dir.lastIndexOf(path.sep) + 1);
+                    if (libraryName === 'node') continue; // quick fix to skip any node library for typings - these are now included in typescript
+                    const lines = readLines(files[i]);
+                    for (let k = 0; k < lines.length; k++) {
+                        const line = lines[k];
+                        const matches = line.match(matchers.typings);
+                        if (matches && matches[1]) {
+                            asName = createAsName(matches[1].toString());
+                            break;
+                        }
+                    }
+                    let _export: IExport = {
+                        libraryName: libraryName,
+                        path: file.path.dir,
+                        type: ExportType.TYPING,
+                        asName: asName || libraryName
+                    }
+                    exports.push(_export);
                 } else if (file.dts &&
                     file.path.dir.indexOf('node_modules' + path.sep) !== -1 &&
                     includeNode) {
                     // skip common directories where we do not need to look
+                    const lines = readLines(files[i]);
                     let validPath = true;
                     for (let z = 0; z < commonIgnorePaths.length; z++) {
                         if (file.path.dir.indexOf(path.sep + commonIgnorePaths[z]) !== -1) validPath = false;
@@ -194,8 +223,8 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                             type: ExportType.NODE,
                             exported: []
                         }
-                        for (let k = 0; k < file.lines.length; k++) {
-                            const line = file.lines[k];
+                        for (let k = 0; k < lines.length; k++) {
+                            const line = lines[k];
                             const matches = line.match(matchers.exports);
                             if (matches &&
                                 checkIfValid(matches[2], line)) {
@@ -216,8 +245,9 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                         type: ExportType.LOCAL,
                         exported: []
                     }
-                    for (let k = 0; k < file.lines.length; k++) {
-                        const line = file.lines[k];
+                    const lines = readLines(files[i]);
+                    for (let k = 0; k < lines.length; k++) {
+                        const line = lines[k];
                         const matches = line.match(matchers.exports);
                         if (matches &&
                             checkIfValid(matches[2], line)) {
@@ -247,7 +277,13 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
         for (let j = 0; j < i; j++) {
             constructedPath = constructedPath + tree[j] + '/';
         }
-        if (constructedPath.indexOf(path.sep + 'src' + path.sep) !== -1) continue;
+
+        let foundIgnoredPath = false;
+        commonIgnoreLibraryPaths.forEach(d => {
+            if (constructedPath.indexOf(path.sep + d + path.sep) !== -1) foundIgnoredPath = true;
+        });
+        if (foundIgnoredPath) continue;
+
         let files = null;
         try { files = fs.readdirSync(constructedPath); } catch (err) {
             console.log('! path not found: ', constructedPath);

@@ -23,6 +23,13 @@
 
 ## Changelog
 
+### v0.4.0
++ Fixes for Angular 2 and Ionic 2 (RC) support
++ new npm @types now supported by default
++ ignores hidden directories (like .history and .tmp)
++ Indexing on save disabled by default (setting: `scanOnSave`)
++ Manual rescanning can be triggered from the context menu
+
 ### v0.3.4
 + Windows users can now finally use the optimize import function
 + added the setting `spacedImportLine`

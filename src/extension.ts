@@ -38,6 +38,9 @@ export function activate(context: vscode.ExtensionContext) {
             optimizeImports(DefinitionProvider.instance.cachedExports);
         }
     }));
+    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.scanImports', function () {
+        if (readyCheck()) DefinitionProvider.instance.refreshExports();
+    }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.getter', function () {
         const classesList = generateClassesList(EType.GETTER);
         vscode.window.showQuickPick(
@@ -74,6 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
                 description: 'sort and import missing libraries'
             },
             <vscode.QuickPickItem>{
+                label: '(Re)Scan Exports',
+                description: '(re)scan all files in the workscape for exports'
+            },
+            <vscode.QuickPickItem>{
                 label: 'Constructor',
                 description: 'generate a constructor based on privates'
             },
@@ -94,6 +101,8 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.commands.executeCommand('genGetSet.addImport');
             } else if (result && result.label.indexOf('Optimize Imports') !== -1) {
                 vscode.commands.executeCommand('genGetSet.sortImports');
+            } else if (result && result.label.indexOf('(Re)Scan Exports') !== -1) {
+                vscode.commands.executeCommand('genGetSet.scanImports');
             } else if (result && result.label.indexOf('Getter and Setter') !== -1) {
                 vscode.commands.executeCommand('genGetSet.getterAndSetter');
             } else if (result && result.label.indexOf('Getter') !== -1) {
