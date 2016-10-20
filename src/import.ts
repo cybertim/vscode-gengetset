@@ -22,9 +22,18 @@ const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', '
 // start strings which can be ignored in ts files because they are most likely part of a function/class and will obfuscate the overview
 const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
-const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends', 'es2015', 'umd'];
+const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends', 'es5', 'es2015', 'umd'];
 // all library (node_modules) paths which should always be ignored
-const commonIgnoreLibraryPaths: string[] = ['src', 'dist'];
+
+//
+const commonIgnoreLibraryPaths: string[] = <string[]>vscode.workspace.getConfiguration('genGetSet').get('ignoredLibraryPaths');
+//
+const ignoredLibraryList: string[] = <string[]>vscode.workspace.getConfiguration('genGetSet').get('ignoredNodeLibraries');
+//
+const ignoredImportList: string[] = <string[]>vscode.workspace.getConfiguration('genGetSet').get('ignoredImportList');
+//
+const ignoredDictionaryList: string[] = <string[]>vscode.workspace.getConfiguration('genGetSet').get('ignoredDictionaryList');
+
 // all regexp matchers we use to analyze typescript documents
 const matchers = {
     explicitExport: /export(.*)(function|class|type|interface|var|let|const|enum)\s/,
@@ -46,7 +55,7 @@ export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
             const line = vscode.window.activeTextEditor.document.lineAt(i);
             const matches = line.text.match(matchers.imports);
             if (matches) {
-                const _export = containsLibraryName(filteredExports, matches[2]) || containsSanitizedPath(filteredExports, matches[2]);
+                let _export = containsLibraryName(filteredExports, matches[2]) || containsSanitizedPath(filteredExports, matches[2]);
                 if (_export !== null) {
                     const range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
                     builder.replace(range, createImportLine(_export));
@@ -136,7 +145,7 @@ function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
     return filteredExports;
 }
 
-function readLines(file:vscode.Uri) {
+function readLines(file: vscode.Uri) {
     return fs.readFileSync(file.fsPath).toString().split(/(\r?\n)/g);
 }
 
@@ -187,7 +196,8 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     // if there is NO match use the name of the library itself
                     let asName = null;
                     let libraryName = file.path.dir.substring(file.path.dir.lastIndexOf(path.sep) + 1);
-                    if (libraryName === 'node') continue; // quick fix to skip any node library for typings - these are now included in typescript
+                    if (ignoredLibraryList.indexOf(libraryName) !== -1) continue;
+                    // if (libraryName === 'node') continue; // quick fix to skip any node library for typings - these are now included in typescript
                     const lines = readLines(files[i]);
                     for (let k = 0; k < lines.length; k++) {
                         const line = lines[k];
@@ -277,20 +287,17 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
         for (let j = 0; j < i; j++) {
             constructedPath = constructedPath + tree[j] + '/';
         }
-
-        let foundIgnoredPath = false;
-        commonIgnoreLibraryPaths.forEach(d => {
-            if (constructedPath.indexOf(path.sep + d + path.sep) !== -1) foundIgnoredPath = true;
-        });
-        if (foundIgnoredPath) continue;
-
         let files = null;
         try { files = fs.readdirSync(constructedPath); } catch (err) {
             console.log('! path not found: ', constructedPath);
             continue;
         }
+
+        if (ignoredDictionaryList.indexOf(tree[i]) !== -1) return null;
+
+        // match d.ts files which have the same name as the library itself - some services like ng2-translate use this        
         files.forEach(file => {
-            if (file.indexOf('.d.ts') !== -1) {
+            if (file.indexOf(tree[node] + '.d.ts') !== -1) {
                 lastPathWithDTS = '';
                 for (let j = node; j < i; j++) {
                     lastPathWithDTS = lastPathWithDTS + (lastPathWithDTS === '' ? '' : '/') + tree[j];
@@ -298,16 +305,20 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
                 lastPathWithDTS = lastPathWithDTS + '/' + file.split('.d.ts')[0];
             }
         });
+
         if (files && files.indexOf('index.d.ts') !== -1) {
             let returnPath = '';
             for (let j = node; j < i; j++) {
-                returnPath = returnPath + (returnPath === '' ? '' : '/') + tree[j];
+                let foundIgnoredPath = false;
+                commonIgnoreLibraryPaths.forEach(d => {
+                    if (d === tree[j]) foundIgnoredPath = true;
+                });
+                if (!foundIgnoredPath) returnPath = returnPath + (returnPath === '' ? '' : '/') + tree[j];
             }
             return returnPath;
         }
     }
-    // nothing found lets search the base path for a nice .d.ts file and return that
-    // works in most other cases :-)
+
     return lastPathWithDTS;
 }
 
@@ -348,6 +359,7 @@ function createImportLine(_export: IExport): string {
 // based on the location of the open file create a relative path
 // to the imported file
 function sanitizePath(p: string, n: string): string {
+    if (!n) return null; // weird bug solved stopping from optimizing :-)
     const prefix = !p.startsWith('.') ? '.' + path.sep : '';
     let pathComplete = prefix + path.join(p, n);
     // on windows* change the slashes to '/' for cross-platform compatibility
@@ -372,6 +384,7 @@ function createAsName(name: string): string {
 
 function checkIfValid(word: string, line?: string): boolean {
     let explicitMatch = line ? line.match(matchers.explicitExport) : null;
+    if (ignoredImportList.indexOf(word) !== -1) return false;
     if (commonKeywordList.indexOf(word) === -1) {
         for (let i = 0; i < commonKeywordStartsWith.length; i++) {
             if (word.startsWith(commonKeywordStartsWith[i]) && !explicitMatch) {
@@ -416,7 +429,10 @@ function containsLibraryName(exports: IExport[], libraryName: string): IExport {
 
 function containsSanitizedPath(exports: IExport[], _path: string): IExport {
     for (let i = 0; i < exports.length; i++) {
-        if (sanitizePath(exports[i].path, exports[i].libraryName) === _path) return exports[i];
+        const p = sanitizePath(exports[i].path, exports[i].libraryName);
+        if (p === _path) {
+            return exports[i];
+        }
     }
     return null;
 }

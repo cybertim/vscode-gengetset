@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Toolbox",
     "description": "Add and Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -116,6 +116,37 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Index all exports in the workspace when a change is saved."
+                },
+                "genGetSet.ignoredLibraryPaths": {
+                    "type": "array",
+                    "default": [
+                        "src",
+                        "dist"
+                    ],
+                    "description": "An array of paths to ignore when building import rules."
+                },
+                "genGetSet.ignoredNodeLibraries": {
+                    "type": "array",
+                    "default": [
+                        "node",
+                        "chrome"
+                    ],
+                    "description": "An array of node-libraries to ignore when running auto-import."
+                },
+                "genGetSet.ignoredDictionaryList": {
+                    "type": "array",
+                    "default": [
+                        "vscode",
+                        "tsconfig"
+                    ],
+                    "description": "An array of dictionary exports to ignore when running auto-import."
+                },
+                "genGetSet.ignoredImportList": {
+                    "type": "array",
+                    "default": [
+                        "Promise"
+                    ],
+                    "description": "An array of imports to ignore when running auto-import."
                 }
             }
         }

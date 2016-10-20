@@ -1,4 +1,12 @@
-# Optimize Imports, Generate Getters / Setters and Constructors
+# Optimize / Auto Imports, Generate Getters / Setters and Constructors
+
+**Optimize your import lines: add missing imports and remove unused**
+
+![Optimize](demo_optimize.gif)
+
+**Search through all available exports and automatically generate the import-line**
+
+![Import](demo_import.gif)
 
 **Easily create a contructor based on privates.**
 
@@ -8,20 +16,16 @@
 
 ![GetSet](demo_getset.gif)
 
-**Search all available exported functions and classes quickly and generate the import line...**
-
-![Import](demo_import.gif)
-
-**Or just use exported functions and classes from memory and quickly generate all import lines.**
-
-![Optimize](demo_optimize.gif)
-
 **Keep an eye on the eye-icon for quick info about the exports found.**
 
 ![Status](demo_status.gif)
 
 
 ## Changelog
+
+### v0.4.1
++ Fixed a bunch of bugs including one which stopped optimize imports from running
++ Added `ignoredImportList`, `ignoredDictionaryList`, `ignoredLibraryPaths` and `ignoredNodeLibraries` to the settings to customize
 
 ### v0.4.0
 + Fixes for Angular 2 and Ionic 2 (RC) support
@@ -66,6 +70,11 @@ Get VSCode and grab the extension from the [VSCode Extension Market](https://mar
 4. `genGetSet.classic` (default: disabled) use 'getValue' and 'setValue' instead of 'get value' and 'set value'.
 5. `genGetSet.pathStringDelimiter` (default: ') sets which quote use to generate import path.
 5. `genGetSet.spacedImportLine` (default: false) Adds spaces between the beginning and ending of the brackets in an import line.
+6. `genGetSet.scanOnSave` (default: false) Scan the workspace for imports when a document is saved.
+7. `genGetSet.ignoredImportList` (check settings) Imports like 'Promise' have many libraries but seldom need an import line.
+7. `genGetSet.ignoredDictionaryList` (check settings) Dictionaries like 'vscode' and 'tsconfig' which do not need an import line.
+7. `genGetSet.ignoredLibraryPaths` (check settings) Paths like 'dist' and 'src' which can be omitted in the import line.
+7. `genGetSet.ignoredNodeLibraries` (check settings) A list of node module libraries like 'chrome' and 'node' which can be ignored as an import line.
 
 ## Usage
 
@@ -128,6 +137,6 @@ This is a TypeScript only extension.
 
 ## Contributors
 Special thanks to the github users:
-AngelMunoz, edotassi, Aranir, buehler
+AngelMunoz, edotassi, Aranir, buehler, EduwHS
 
 **Enjoy!**
