@@ -1,12 +1,12 @@
 # Optimize / Auto Imports, Generate Getters / Setters and Constructors
 
-**Optimize your import lines: add missing imports and remove unused**
+**Simply click on the Light Bulb to add the missing import line**
+
+![Import](demo_bulb.gif)
+
+**Optimize all your import lines: add missing imports and remove unused**
 
 ![Optimize](demo_optimize.gif)
-
-**Search through all available exports and automatically generate the import-line**
-
-![Import](demo_import.gif)
 
 **Easily create a contructor based on privates.**
 
@@ -23,6 +23,10 @@
 
 ## Changelog
 
+### v0.4.2
++ Light Bulb feature added for easy importing
++ Some backend optimizations
+
 ### v0.4.1
 + Fixed a bunch of bugs including one which stopped optimize imports from running
 + Added `ignoredImportList`, `ignoredDictionaryList`, `ignoredLibraryPaths` and `ignoredNodeLibraries` to the settings to customize
@@ -34,29 +38,19 @@
 + Indexing on save disabled by default (setting: `scanOnSave`)
 + Manual rescanning can be triggered from the context menu
 
-### v0.3.4
+### v0.3.4 - v0.3.0
 + Windows users can now finally use the optimize import function
 + added the setting `spacedImportLine`
-
-### v0.3.3
 + new name and icon ;-)
 + resolved some issues eg. reported on github
-
-### v0.3.2
 + fixed `@angular` related import optimizations
 + fixed command palette issues
-
-### v0.3.1
 + introducing the statusbar Eye-Icon showing the status of the extension (searching for and exports found)
 + solution for searching through and adding one of the available exports: `Add Import`
-+ ..and a bunch of fixed reported issues
-
-### v0.3.0
-+ complete optimized code rewrite of the extension
 + now with support for TypeScript based modules (ex. Ionic 2 and Angular 2)
 + import paths `/` are now completely OS independent
 + intellisense suggestions have been removed (searching for other solution)
-+ and lots of small open issues have been fixed and/or optimized
++ complete optimized code rewrite of the extension
 
 ## Install
 Get VSCode and grab the extension from the [VSCode Extension Market](https://marketplace.visualstudio.com/items?itemName=DSKWRK.vscode-generate-getter-setter)

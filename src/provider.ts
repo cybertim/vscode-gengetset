@@ -48,6 +48,21 @@ export class DefinitionProvider {
         return this._cachedExports;
     }
 
+    public containsItem(name: string): boolean {
+        for (let i = 0; i < this._cachedExports.length; i++) {
+            if (this._cachedExports[i].libraryName) {
+                if (this._cachedExports[i].exported) {
+                    for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
+                        if (this._cachedExports[i].exported[j] === name) return true;
+                    }
+                } else {
+                    if (this._cachedExports[i].asName === name) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public toQuickPickItemList(): Thenable<vscode.QuickPickItem[]> {
         return new Promise((resolve, reject) => {
             let quickPickItemList: vscode.QuickPickItem[] = [];

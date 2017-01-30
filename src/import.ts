@@ -20,7 +20,7 @@ export interface IExport {
 // a quick list of keywords we probably want to skip asap.
 const commonKeywordList: string[] = ['window', 'dom', 'array', 'from', 'null', 'return', 'get', 'set', 'boolean', 'string', 'if', 'var', 'let', 'const', 'for', 'public', 'class', 'interface', 'new', 'import', 'as', 'private', 'while', 'case', 'switch', 'this', 'function', 'enum'];
 // start strings which can be ignored in ts files because they are most likely part of a function/class and will obfuscate the overview
-const commonKeywordStartsWith: string[] = ['id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
+const commonKeywordStartsWith: string[] = ['copy', 'id', 'ready', 'cancel', 'build', 'finish', 'merge', 'clamp', 'construct', 'native', 'clear', 'update', 'parse', 'sanitize', 'render', 'has', 'equal', 'dispose', 'create', 'as', 'is', 'init', 'process', 'get', 'set'];
 // paths to ignore while looking through node_modules 
 const commonIgnorePaths: string[] = ['esm', 'testing', 'test', 'facade', 'backends', 'es5', 'es2015', 'umd'];
 // all library (node_modules) paths which should always be ignored
@@ -46,8 +46,8 @@ const matchers = {
 // search for keywords in the active document and match them with all indexed exports
 // filter the list till there are only 'imports' left which we need for this active doc
 // optional: add a single non mentioned 'nontype' and it will be mixed with the optimize
-export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
-    const filteredExports = filterExports(exports, nonTypedEntry);
+export function optimizeImports(exports: IExport[]) {
+    const filteredExports = filterExports(exports);
     vscode.window.activeTextEditor.edit((builder) => {
         const lineCount = vscode.window.activeTextEditor.document.lineCount;
         // search for import-lines we can replace instead of adding another bunch of the same lines
@@ -77,22 +77,41 @@ export function optimizeImports(exports: IExport[], nonTypedEntry?: string) {
     });
 }
 
+export function addSingleImport(exports: IExport[], name: string) {
+    vscode.window.activeTextEditor.edit((builder) => {
+        // if name is set add the entry on forehand
+        // this entry is probably import only and not used yet within the document
+        // this item is cloned from the normal filter list and altered
+        const filteredExports: IExport[] = [];
+        const lineCount = vscode.window.activeTextEditor.document.lineCount;
+        const entry = containsExportedName(exports, name) || containsAsName(exports, name);
+        const _export = cloneFromExport(path.parse(vscode.window.activeTextEditor.document.fileName).dir, entry);
+        _export.exported.push(name);
+        filteredExports.push(_export);
+        for (let i = 0; i < lineCount; i++) {
+            const line = vscode.window.activeTextEditor.document.lineAt(i);
+            const matches = line.text.match(matchers.imports);
+            if (matches) {
+                // the matching line is re-build with previous imports so they do not dissapear
+                let _export = containsLibraryName(filteredExports, matches[2]) || containsSanitizedPath(filteredExports, matches[2]);
+                if (_export !== null) {
+                    const others = matches[1].trim().split(',');
+                    if (others.length > 0) others.forEach(o => _export.exported.push(o));
+                    const range = new vscode.Range(new vscode.Position(i, 0), new vscode.Position(i + 1, 0));
+                    builder.replace(range, createImportLine(_export));
+                    return;
+                }
+            }
+        }
+        builder.replace(new vscode.Position(0, 0), createImportLine(filteredExports[0]));
+    });
+}
+
 // filter (ex. all exports found in the workspace) againt the active/open file in the editor
 // create a list of imports needed based on words found in the open file
-function filterExports(exports: IExport[], _nonTypedEntry?: string): IExport[] {
+function filterExports(exports: IExport[]): IExport[] {
     const currentDir = path.parse(vscode.window.activeTextEditor.document.fileName).dir;
     let filteredExports: IExport[] = [];
-    // if nontyped is set add the entry on forehand
-    // this entry is probably import only and not used yet within the document
-    // (ex. aded with the add-import menu function)
-    if (_nonTypedEntry) {
-        const entry = containsExportedName(exports, _nonTypedEntry) || containsAsName(exports, _nonTypedEntry);
-        if (entry) {
-            const _export = cloneFromExport(currentDir, entry);
-            _export.exported.push(_nonTypedEntry);
-            if (_export) filteredExports.push(_export);
-        }
-    }
     const file = {
         currentPos: vscode.window.activeTextEditor.selection.active,
         fileName: vscode.window.activeTextEditor.document.fileName,

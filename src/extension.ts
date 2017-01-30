@@ -1,6 +1,7 @@
-import {DefinitionProvider} from './provider';
-import {optimizeImports, analyzeWorkspace, IExport} from './import';
-import {generateCode, generateClassesList, quickPickItemListFrom, EType} from './getset';
+import { CompleteActionProvider } from './bulb';
+import { DefinitionProvider } from './provider';
+import { addSingleImport, optimizeImports } from './import';
+import { generateClassesList, EType, quickPickItemListFrom, generateCode } from './getset';
 import * as vscode from 'vscode';
 
 const TYPESCRIPT: vscode.DocumentFilter = { language: 'typescript' }
@@ -24,13 +25,18 @@ function readyCheck() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.addImport', function () {
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(TYPESCRIPT, new CompleteActionProvider()));
+    context.subscriptions.push(vscode.commands.registerCommand('genGetSet.addImport', function (item?: string) {
         if (readyCheck()) {
-            vscode.window.showQuickPick(
-                DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
-                    if (!pickedItem) return;
-                    optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
-                });
+            if (!item) {
+                vscode.window.showQuickPick(
+                    DefinitionProvider.instance.toQuickPickItemList()).then((pickedItem) => {
+                        if (!pickedItem) return;
+                        addSingleImport(DefinitionProvider.instance.cachedExports, pickedItem.label);
+                    });
+            } else {
+                addSingleImport(DefinitionProvider.instance.cachedExports, item);
+            }
         }
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.sortImports', function () {
@@ -77,8 +83,8 @@ export function activate(context: vscode.ExtensionContext) {
                 description: 'sort and import missing libraries'
             },
             <vscode.QuickPickItem>{
-                label: '(Re)Scan Exports',
-                description: '(re)scan all files in the workscape for exports'
+                label: 'Rescan Workspace',
+                description: 'rescan all files in the workscape for exports'
             },
             <vscode.QuickPickItem>{
                 label: 'Constructor',
@@ -101,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.commands.executeCommand('genGetSet.addImport');
             } else if (result && result.label.indexOf('Optimize Imports') !== -1) {
                 vscode.commands.executeCommand('genGetSet.sortImports');
-            } else if (result && result.label.indexOf('(Re)Scan Exports') !== -1) {
+            } else if (result && result.label.indexOf('Rescan Workspace') !== -1) {
                 vscode.commands.executeCommand('genGetSet.scanImports');
             } else if (result && result.label.indexOf('Getter and Setter') !== -1) {
                 vscode.commands.executeCommand('genGetSet.getterAndSetter');
