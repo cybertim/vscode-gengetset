@@ -48,25 +48,67 @@ export function activate(context: vscode.ExtensionContext) {
         if (readyCheck()) DefinitionProvider.instance.refreshExports();
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.getter', function () {
-        const classesList = generateClassesList(EType.GETTER);
-        vscode.window.showQuickPick(
-            quickPickItemListFrom(classesList, EType.GETTER)).then((pickedItem) => {
-                generateCode(classesList, EType.GETTER, pickedItem);
-            });
+        let classesList = generateClassesList(EType.GETTER);
+
+        // Add ALL option
+        let addAllClass: any = {name: 'any', vars: [{name: 'Add all', typeName:'Getters'}]};
+        classesList.unshift(addAllClass);
+
+        const extendedClassesList = classesList;
+        const quickPickItemList: vscode.QuickPickItem[] = quickPickItemListFrom(extendedClassesList, EType.GETTER);
+        vscode.window.showQuickPick(quickPickItemList).then((pickedItem) => {
+            let auxPickedItemList: vscode.QuickPickItem[] = [];
+            // Check if ALL option was selected
+            if(pickedItem.label == 'Add all') 
+                auxPickedItemList = quickPickItemList.splice(1,quickPickItemList.length-1);
+            else 
+                auxPickedItemList.push(pickedItem);    
+            // Generate multiple getters and setter after remove added auxiliary ALL Option
+            generateCode(extendedClassesList.splice(1,extendedClassesList.length-1), EType.GETTER, 
+                auxPickedItemList);
+        });
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.setter', function () {
-        const classesList = generateClassesList(EType.SETTER);
-        vscode.window.showQuickPick(
-            quickPickItemListFrom(classesList, EType.SETTER)).then((pickedItem) => {
-                generateCode(classesList, EType.SETTER, pickedItem);
-            });
+        let classesList = generateClassesList(EType.SETTER);
+
+        // Add ALL option
+        let addAllClass: any = {name: 'any', vars: [{name: 'Add all', typeName:'Setters'}]};
+        classesList.unshift(addAllClass);
+
+        const extendedClassesList = classesList;
+        const quickPickItemList: vscode.QuickPickItem[] = quickPickItemListFrom(extendedClassesList, EType.SETTER);
+        vscode.window.showQuickPick(quickPickItemList).then((pickedItem) => {
+            let auxPickedItemList: vscode.QuickPickItem[] = [];
+            // Check if ALL option was selected
+            if(pickedItem.label == 'Add all') 
+                auxPickedItemList = quickPickItemList.splice(1,quickPickItemList.length-1);
+            else 
+                auxPickedItemList.push(pickedItem);    
+            // Generate multiple getters and setter after remove added auxiliary ALL Option
+            generateCode(extendedClassesList.splice(1,extendedClassesList.length-1), EType.SETTER, 
+                auxPickedItemList);
+        });
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.getterAndSetter', function () {
-        const classesList = generateClassesList(EType.BOTH);
-        vscode.window.showQuickPick(
-            quickPickItemListFrom(classesList, EType.BOTH)).then((pickedItem) => {
-                generateCode(classesList, EType.BOTH, pickedItem);
-            });
+        let classesList = generateClassesList(EType.BOTH);
+
+        // Add ALL option
+        let addAllClass: any = {name: 'any', vars: [{name: 'Add all', typeName:'Getters and Setters'}]};
+        classesList.unshift(addAllClass);
+
+        const extendedClassesList = classesList;
+        const quickPickItemList: vscode.QuickPickItem[] = quickPickItemListFrom(extendedClassesList, EType.BOTH);
+        vscode.window.showQuickPick(quickPickItemList).then((pickedItem) => {
+            let auxPickedItemList: vscode.QuickPickItem[] = [];
+            // Check if ALL option was selected
+            if(pickedItem.label == 'Add all') 
+                auxPickedItemList = quickPickItemList.splice(1,quickPickItemList.length-1);
+            else 
+                auxPickedItemList.push(pickedItem);    
+            // Generate multiple getters and setter after remove added auxiliary ALL Option
+            generateCode(extendedClassesList.splice(1,extendedClassesList.length-1), EType.BOTH, 
+                auxPickedItemList);
+        });
     }));
     context.subscriptions.push(vscode.commands.registerCommand('genGetSet.constructor', function () {
         const classesList = generateClassesList(EType.BOTH);
