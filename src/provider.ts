@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export class DefinitionProvider {
 
     private static _instance: DefinitionProvider = new DefinitionProvider();
-    private _cachedExports: IExport[];
+    private _cachedExports: IExport[] = [];
     private _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     private _refreshing: boolean = false;
 
