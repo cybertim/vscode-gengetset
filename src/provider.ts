@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export class DefinitionProvider {
 
     private static _instance: DefinitionProvider = new DefinitionProvider();
-    private _cachedExports: IExport[];
+    private _cachedExports: IExport[] = [];
     private _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     private _refreshing: boolean = false;
 
@@ -35,7 +35,7 @@ export class DefinitionProvider {
             this._statusBarItem.text = '$(eye) $(sync)';
             analyzeWorkspace().then((exports) => {
                 this._refreshing = false;
-                this._cachedExports = exports;
+                this._cachedExports = exports || [];
                 this._statusBarItem.text = '$(eye) ' + exports.length;
             }, (err) => {
                 this._refreshing = false;
