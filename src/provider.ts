@@ -35,7 +35,7 @@ export class DefinitionProvider {
             this._statusBarItem.text = '$(eye) $(sync)';
             analyzeWorkspace().then((exports) => {
                 this._refreshing = false;
-                this._cachedExports = exports || [];
+                this._cachedExports = exports;
                 this._statusBarItem.text = '$(eye) ' + exports.length;
             }, (err) => {
                 this._refreshing = false;
