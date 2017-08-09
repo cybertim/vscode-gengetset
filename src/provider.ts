@@ -7,6 +7,7 @@ export class DefinitionProvider {
     private _cachedExports: IExport[];
     private _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     private _refreshing: boolean = false;
+    private _refreshingPromise: Promise<void> = undefined;
 
     constructor() {
         if (DefinitionProvider._instance)
@@ -33,14 +34,26 @@ export class DefinitionProvider {
         if (!this._refreshing) {
             this._refreshing = true;
             this._statusBarItem.text = '$(eye) $(sync)';
-            analyzeWorkspace().then((exports) => {
-                this._refreshing = false;
-                this._cachedExports = exports;
-                this._statusBarItem.text = '$(eye) ' + exports.length;
-            }, (err) => {
-                this._refreshing = false;
-                this._statusBarItem.text = '';
-            });
+            
+            this._refreshingPromise = new Promise<void>((resolve, reject) => {
+              
+                analyzeWorkspace().then((exports) => {
+                    this._refreshing = false;
+                    this._cachedExports = exports;
+
+                    resolve();
+                    this._refreshingPromise = undefined;
+
+                    this._statusBarItem.text = '$(eye) ' + exports.length;
+                }, (err) => {                    
+                    this._refreshing = false;
+                    this._statusBarItem.text = '';
+
+                    resolve(); // Never reject. 
+                    this._refreshingPromise = undefined;
+                });
+              
+            });    
         }
     }
 
@@ -48,20 +61,33 @@ export class DefinitionProvider {
         return this._cachedExports;
     }
 
-    public containsItem(name: string): boolean {
-        for (let i = 0; i < this._cachedExports.length; i++) {
-            if (this._cachedExports[i].libraryName) {
-                if (this._cachedExports[i].exported) {
-                    for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
-                        if (this._cachedExports[i].exported[j] === name) return true;
-                    }
-                } else {
-                    if (this._cachedExports[i].asName === name) return true;
-                }
-            }
+    public getCachedExportsAsync(): Promise<IExport[]> {
+        if (!this._refreshingPromise)
+            return Promise.resolve(this._cachedExports);
+        else {
+            return new Promise<IExport[]>((resolve, reject) => {
+                this._refreshingPromise.then(() => {
+                    resolve(this._cachedExports);
+                });
+            });
         }
-        return false;
     }
+
+    
+    // public containsItem(name: string): boolean {
+    //     for (let i = 0; i < this._cachedExports.length; i++) {
+    //         if (this._cachedExports[i].libraryName) {
+    //             if (this._cachedExports[i].exported) {
+    //                 for (let j = 0; j < this._cachedExports[i].exported.length; j++) {
+    //                     if (this._cachedExports[i].exported[j] === name) return true;
+    //                 }
+    //             } else {
+    //                 if (this._cachedExports[i].asName === name) return true;
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
 
     public toQuickPickItemList(): Thenable<vscode.QuickPickItem[]> {
         return new Promise((resolve, reject) => {

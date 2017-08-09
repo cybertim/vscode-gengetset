@@ -14,6 +14,26 @@ export interface IExport {
     asName?: string;
 }
 
+export function exportListContainsItem(exportList: IExport[], name: string): boolean {
+    if (!exportList)
+        return false;
+
+    for (let i = 0; i < exportList.length; i++) {
+        if (exportList[i].libraryName) {
+            if (exportList[i].exported) {
+                for (let j = 0; j < exportList[i].exported.length; j++) {
+                    if (exportList[i].exported[j] === name)
+                        return true;
+                }
+            } else {
+                if (exportList[i].asName === name)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
 //
 // the 'magic numbers' which make this extension possible :-)
 //
@@ -184,6 +204,8 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     path: path.parse(files[i].fsPath),
                     dts: files[i].fsPath.endsWith('.d.ts')
                 }
+
+                let nodeModulesPosInPath: number;
                 // analyze files based on their EType
                 // TODO: Typings is now ALSO deprecated - remove later on?
                 if (file.dts &&
@@ -234,13 +256,14 @@ export function analyzeWorkspace(): Promise<IExport[]> {
                     }
                     exports.push(_export);
                 } else if (file.dts &&
-                    file.path.dir.indexOf('node_modules' + path.sep) !== -1 &&
+                    (nodeModulesPosInPath = file.path.dir.indexOf('node_modules' + path.sep)) !== -1 &&
                     includeNode) {
                     // skip common directories where we do not need to look
                     const lines = readLines(files[i]);
                     let validPath = true;
                     for (let z = 0; z < commonIgnorePaths.length; z++) {
-                        if (file.path.dir.indexOf(path.sep + commonIgnorePaths[z]) !== -1) validPath = false;
+                        if (file.path.dir.indexOf(path.sep + commonIgnorePaths[z] + path.sep, nodeModulesPosInPath) !== -1)
+                            validPath = false;
                     }
                     // Process node_modules like Angular2 etc.
                     // these libraries contain their own d.ts files with 'export declares'
@@ -336,6 +359,21 @@ function constructNodeLibraryName(_path: path.ParsedPath): string {
             }
             return returnPath;
         }
+    }
+
+    // The above looks for an index.d.ts or <libraryName>.d.ts  When not found, fall back to just raw compiled ts library output
+    if (!lastPathWithDTS && node < tree.length) { 
+        let constructedPath = "";
+        for (let j = node; j < tree.length; j++) {
+            constructedPath = constructedPath + tree[j] + '/';
+        }
+
+        constructedPath += _path.name;
+
+        if (constructedPath.endsWith('.d'))
+            constructedPath = constructedPath.substr(0, constructedPath.length - 2);
+
+        lastPathWithDTS = constructedPath;
     }
 
     return lastPathWithDTS;
