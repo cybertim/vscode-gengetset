@@ -57,6 +57,26 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vscode
     }
 }
 
+// generate multiple line, can't call vscode.window.activeTextEditor.edit(builder => {}) serveral time by command, don't know why
+export function generateAllGetterAndSetter(classesListGetter, classesListSetter) {
+
+    const currentPos = new vscode.Position(vscode.window.activeTextEditor.selection.active.line, 0);
+
+    let totalString = '';
+
+    classesListGetter[0].vars.forEach(variable => {
+        totalString += createGetter(variable);
+    });
+
+    classesListSetter[0].vars.forEach(variable => {
+        totalString += createSetter(variable);
+    });
+
+    vscode.window.activeTextEditor.edit((builder) => {
+        builder.insert(currentPos, totalString);
+    });
+}
+
 // generate a list of pickable items based on EType
 export function quickPickItemListFrom(classes: IClass[], type: EType): vscode.QuickPickItem[] {
     let quickPickItemList: vscode.QuickPickItem[] = [];

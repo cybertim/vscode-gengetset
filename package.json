@@ -39,12 +39,15 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "keybindings": [{
-            "command": "genGetSet.popup",
-            "key": "alt+shift+g",
-            "when": "editorTextFocus"
-        }],
-        "commands": [{
+        "keybindings": [
+            {
+                "command": "genGetSet.popup",
+                "key": "alt+shift+g",
+                "when": "editorTextFocus"
+            }
+        ],
+        "commands": [
+            {
                 "command": "genGetSet.getter",
                 "title": "TypeScript: Generate Getter"
             },
@@ -55,6 +58,10 @@
             {
                 "command": "genGetSet.getterAndSetter",
                 "title": "TypeScript: Generate Getter and Setter"
+            },
+            {
+                "command": "genGetSet.allGetterAndSetter",
+                "title": "TypeScript: Generate ALL Getter and Setter"
             },
             {
                 "command": "genGetSet.constructor",
