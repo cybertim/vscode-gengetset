@@ -27,23 +27,24 @@ const matchers = {
 }
 
 // generate code lines into the current active window based on EType
-export function generateCode(classes: IClass[], type: EType, pickedItem?: vscode.QuickPickItem) {
+export function generateCode(classes: IClass[], type: EType, pickedItems?: vscode.QuickPickItem[]) {
     const currentPos = new vscode.Position(vscode.window.activeTextEditor.selection.active.line, 0);
-    if (type !== EType.CONSTRUCTOR && pickedItem) {
-        const _class = getClass(classes, pickedItem.description);
+    if (type !== EType.CONSTRUCTOR && (pickedItems && (pickedItems.length > 0))) {
+        const _class = getClass(classes, pickedItems[0].description);
         if (_class) {
-            for (let i = 0; i < _class.vars.length; i++) {
-                var item = _class.vars[i];
-                if (item && pickedItem.label === item.name) {
-                    vscode.window.activeTextEditor.edit((builder) => {
-                        // add template code blocks before the cursor position's line number
-                        if (type == EType.GETTER || type == EType.BOTH)
-                            builder.insert(currentPos, createGetter(item));
-                        if (type == EType.SETTER || type == EType.BOTH)
-                            builder.insert(currentPos, createSetter(item));
+            vscode.window.activeTextEditor.edit((builder) => {
+                _class.vars.forEach(item =>{
+                    pickedItems.forEach((pickedItem)=>{
+                        if (pickedItem.label === item.name) {
+                            // add template code blocks before the cursor position's line number
+                            if (type == EType.GETTER || type == EType.BOTH)
+                                builder.insert(currentPos, createGetter(item));
+                            if (type == EType.SETTER || type == EType.BOTH)
+                                builder.insert(currentPos, createSetter(item));
+                        }
                     });
-                }
-            }
+                });
+            });
         }
     } else if (type === EType.CONSTRUCTOR) {
         vscode.window.activeTextEditor.edit((builder) => {
@@ -249,4 +250,16 @@ function getClass(items: IClass[], name: string): IClass {
         }
     }
     return null;
+}
+function getClasses(items: IClass[], pickedItems: vscode.QuickPickItem[]): IClass[] {
+    let auxItems: IClass[] = [];
+
+    for(let j = 0; j < pickedItems.length; j++){
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].name === pickedItems[j].description) {
+                auxItems.push(items[i]);
+            }
+        }
+    }
+    return auxItems;
 }
