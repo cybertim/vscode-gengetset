@@ -57,6 +57,26 @@ export function generateCode(classes: IClass[], type: EType, pickedItem?: vscode
     }
 }
 
+// generate multiple line, can't call vscode.window.activeTextEditor.edit(builder => {}) serveral time by command, don't know why
+export function generateAllGetterAndSetter(classesListGetter, classesListSetter) {
+
+    const currentPos = new vscode.Position(vscode.window.activeTextEditor.selection.active.line, 0);
+
+    let totalString = '';
+
+    classesListGetter[0].vars.forEach(variable => {
+        totalString += createGetter(variable);
+    });
+
+    classesListSetter[0].vars.forEach(variable => {
+        totalString += createSetter(variable);
+    });
+
+    vscode.window.activeTextEditor.edit((builder) => {
+        builder.insert(currentPos, totalString);
+    });
+}
+
 // generate a list of pickable items based on EType
 export function quickPickItemListFrom(classes: IClass[], type: EType): vscode.QuickPickItem[] {
     let quickPickItemList: vscode.QuickPickItem[] = [];
@@ -182,11 +202,11 @@ function publicName(fname: string) {
 function createGetter(item: IVar) {
     const classic = vscode.workspace.getConfiguration('genGetSet').get('classic');
     if (classic) {
-        return '\n\tpublic get' + item.name.charAt(0).toUpperCase() + item.name.substring(1) + '(): ' + item.typeName + ' {\n' +
+        return '\n    /**\n     * Getter ' + item.figure + '\n     * @return {' + item.typeName + '}\n     */\n\tpublic get' + item.name.charAt(0).toUpperCase() + item.name.substring(1) + '(): ' + item.typeName + ' {\n' +
             '\t\treturn this.' + item.name + ';\n' +
             '\t}\n';
     } else {
-        return '\n\tpublic get ' + item.figure + '(): ' + item.typeName + ' {\n' +
+        return '\n    /**\n     * Getter ' + item.figure + '\n     * @return {' + item.typeName + '}\n     */\n\tpublic get ' + item.figure + '(): ' + item.typeName + ' {\n' +
             '\t\treturn this.' + item.name + ';\n' +
             '\t}\n';
     }
@@ -195,11 +215,11 @@ function createGetter(item: IVar) {
 function createSetter(item: IVar) {
     const classic = vscode.workspace.getConfiguration('genGetSet').get('classic');
     if (classic) {
-        return '\n\tpublic set' + item.name.charAt(0).toUpperCase() + item.name.substring(1) + '(value: ' + item.typeName + ') {\n' +
+        return '\n    /**\n     * Setter ' + item.figure + '\n     * @param {' + item.typeName + '} value\n     */\n\tpublic set' + item.name.charAt(0).toUpperCase() + item.name.substring(1) + '(value: ' + item.typeName + ') {\n' +
             '\t\tthis.' + item.name + ' = value;\n' +
             '\t}\n';
     } else {
-        return '\n\tpublic set ' + item.figure + '(value: ' + item.typeName + ') {\n' +
+        return '\n    /**\n     * Setter ' + item.figure + '\n     * @param {' + item.typeName + '} value\n     */\n\tpublic set ' + item.figure + '(value: ' + item.typeName + ') {\n' +
             '\t\tthis.' + item.name + ' = value;\n' +
             '\t}\n';
     }
