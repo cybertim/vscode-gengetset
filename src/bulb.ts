@@ -1,22 +1,30 @@
 import { DefinitionProvider } from './provider';
 import * as vscode from 'vscode';
+import { IExport, exportListContainsItem } from "./import";
 
 export class CompleteActionProvider implements vscode.CodeActionProvider {
-    public provideCodeActions(document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.Command[]> {
-        return new Promise((resolve, reject) => {
-            // optimizeImports(DefinitionProvider.instance.cachedExports, pickedItem.label);
+
+    public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.Command[]> {
+
+        try {
             const keyword = document.getText(range);
-            if (DefinitionProvider.instance.containsItem(keyword)) {
-                resolve([
+
+            const cachedExports: IExport[] = await DefinitionProvider.instance.getCachedExportsAsync();
+
+            if (exportListContainsItem(cachedExports, keyword)) {
+                return [
                     {
                         arguments: [keyword],
                         command: 'genGetSet.addImport',
                         title: 'Add import for ' + keyword
                     }
-                ]);
-            } else {
-                resolve([]);
+                ];
             }
-        });
+
+        } catch (err) {
+
+        }
+        
+        return [];
     }
 }
