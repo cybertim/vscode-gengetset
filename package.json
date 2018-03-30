@@ -2,7 +2,7 @@
     "name": "vscode-generate-getter-setter",
     "displayName": "TypeScript Toolbox",
     "description": "Add and Optimize Imports, Generate Getters / Setters and Constructors",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "publisher": "DSKWRK",
     "icon": "icon.png",
     "galleryBanner": {
@@ -39,15 +39,12 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "keybindings": [
-            {
-                "command": "genGetSet.popup",
-                "key": "alt+shift+g",
-                "when": "editorTextFocus"
-            }
-        ],
-        "commands": [
-            {
+        "keybindings": [{
+            "command": "genGetSet.popup",
+            "key": "alt+shift+g",
+            "when": "editorTextFocus"
+        }],
+        "commands": [{
                 "command": "genGetSet.getter",
                 "title": "TypeScript: Generate Getter"
             },
@@ -162,10 +159,13 @@
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
         "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
+        "test": "node ./node_modules/vscode/bin/test",
+        "publish": "vsce publish"
     },
     "devDependencies": {
         "typescript": "^1.8.10",
+        "vsce": "^1.37.6",
         "vscode": "^0.11.13"
-    }
+    },
+    "dependencies": {}
 }

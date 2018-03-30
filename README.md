@@ -23,6 +23,9 @@
 
 ## Changelog
 
+### v0.5.0
++ Merged contributions: Get/Setter for All at once including comments and a whole list of housekeeping in the code :)
+
 ### v0.4.2
 + Light Bulb feature added for easy importing
 + Some backend optimizations
@@ -131,6 +134,6 @@ This is a TypeScript only extension.
 
 ## Contributors
 Special thanks to the github users:
-AngelMunoz, edotassi, Aranir, buehler, EduwHS
+AngelMunoz, edotassi, Aranir, buehler, EduwHS, Anexon, Tchoupinax, dball-adashi 
 
 **Enjoy!**
