@@ -38,6 +38,15 @@ suite("Regex Util Constructor Tests", () => {
         assert.equal("Int<First, Second, Third>", matches[1].type);
     });
 
+    test("Can match params with default value", () => {
+        const matches = regexutil.findCtorPrivateParams("constructor(private _test1: string = \"test1\", variable: string = 'abc',  private _test2: number = 7)");
+        assert.equal(2, matches.length);
+        assert.equal("_test1", matches[0].name);
+        assert.equal("string", matches[0].type);
+        assert.equal("_test2", matches[1].name);
+        assert.equal("number", matches[1].type);
+    });
+
     test("Does not match if not constructor", () => {
         const matches = regexutil.findCtorPrivateParams("myMethod(private _name: string, private _age: number)");
         assert.equal(0, matches.length);
