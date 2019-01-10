@@ -2,7 +2,7 @@ import { Variable } from './variable';
 
 const matchers = {
     ctorDef: /\s*constructor\(\s*([^)]+?)\s*\)/,
-    ctorParam: /(?:public)?(private)?\s*([a-zA-Z_$][\w$]+)\s*\??:\s*([\.\w$]+<(?:[\.\w$\s]+,?)+>|[\.\[\]\w$]+)[^,]*,?\s*/y,
+    ctorParam: /(?:public)?(private)?\s*([a-zA-Z_$][\w$]+)\s*\??:\s*([\.\w$]+<(?:[\.\[\]\w$\s]+,?)+>|[\.\[\]\w$]+)[^,]*,?\s*/y,
 };
 
 /**

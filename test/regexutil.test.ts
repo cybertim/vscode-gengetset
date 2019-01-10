@@ -30,12 +30,12 @@ suite("Regex Util Constructor Tests", () => {
     });
 
     test("Can match generic types with more than one argument", () => {
-        const matches = regexutil.findCtorPrivateParams("constructor(private _test1: Type<string, number>, private _test2: Int<First, Second, Third>)");
+        const matches = regexutil.findCtorPrivateParams("constructor(private _test1: Type<string, number>, private _test2: Int<First, Second[], Third>)");
         assert.equal(2, matches.length);
         assert.equal("_test1", matches[0].name);
         assert.equal("Type<string, number>", matches[0].type);
         assert.equal("_test2", matches[1].name);
-        assert.equal("Int<First, Second, Third>", matches[1].type);
+        assert.equal("Int<First, Second[], Third>", matches[1].type);
     });
 
     test("Can match params with default value", () => {
