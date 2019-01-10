@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { Variable } from './variable';
 import { findCtorPrivateParams } from './regexutil';
 
 export enum EType {
@@ -132,12 +133,12 @@ export function generateClassesList(type: EType): IClass[] {
             let _class = getClass(classes, brackets.name);
             const matches = {
                 privateDef: line.text.match(matchers.privateDef),
-                ctorMatches: findCtorPrivateParams(line.text),
+                ctorParams: findCtorPrivateParams(line.text),
                 getMethod: line.text.match(matchers.getMethod),
                 setMethod: line.text.match(matchers.setMethod)
             };
             if (_class &&
-                (matches.getMethod || matches.privateDef || matches.setMethod || matches.ctorMatches)) {
+                (matches.getMethod || matches.privateDef || matches.setMethod || matches.ctorParams)) {
                 // push the found items into the approriate containers
                 if (matches.privateDef) {
                     _class.vars.push({
@@ -147,12 +148,12 @@ export function generateClassesList(type: EType): IClass[] {
                     });
                 }
                 // add the private constructor parameters
-                if (matches.ctorMatches.length !== 0) {
-                    for (const match of matches.ctorMatches) {
+                if (matches.ctorParams.length !== 0) {
+                    for (const param of matches.ctorParams) {
                         _class.vars.push({
-                            name: match[2],
-                            figure: publicName(match[2]),
-                            typeName: match[3]
+                            name: param.name,
+                            figure: publicName(param.name),
+                            typeName: param.type
                         });
                     }
                 }
