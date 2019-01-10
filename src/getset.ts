@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 
+import { Variable } from './variable';
+import { findCtorPrivateParams } from './regexutil';
+
 export enum EType {
     GETTER, SETTER, BOTH, CONSTRUCTOR
 }
@@ -130,11 +133,12 @@ export function generateClassesList(type: EType): IClass[] {
             let _class = getClass(classes, brackets.name);
             const matches = {
                 privateDef: line.text.match(matchers.privateDef),
+                ctorParams: findCtorPrivateParams(line.text),
                 getMethod: line.text.match(matchers.getMethod),
                 setMethod: line.text.match(matchers.setMethod)
             };
             if (_class &&
-                (matches.getMethod || matches.privateDef || matches.setMethod)) {
+                (matches.getMethod || matches.privateDef || matches.setMethod || matches.ctorParams)) {
                 // push the found items into the approriate containers
                 if (matches.privateDef) {
                     _class.vars.push({
@@ -142,6 +146,16 @@ export function generateClassesList(type: EType): IClass[] {
                         figure: publicName(matches.privateDef[1]),
                         typeName: matches.privateDef[2]
                     });
+                }
+                // add the private constructor parameters
+                if (matches.ctorParams.length !== 0) {
+                    for (const param of matches.ctorParams) {
+                        _class.vars.push({
+                            name: param.name,
+                            figure: publicName(param.name),
+                            typeName: param.type
+                        });
+                    }
                 }
                 if (matches.getMethod) _class.getters.push(matches.getMethod[1]);
                 if (matches.setMethod) _class.setters.push(matches.setMethod[1]);
@@ -172,7 +186,8 @@ export function generateClassesList(type: EType): IClass[] {
                                         break;
                                     }
                                 }
-                            } else if (type == EType.SETTER || type == EType.BOTH) {
+                            } 
+                            if (type == EType.SETTER || type == EType.BOTH) {
                                 for (let j = 0; j < _class.setters.length; j++) {
                                     if (_class.vars[i].figure.toLowerCase() === _class.setters[j].toLowerCase()) {
                                         _class.vars.splice(i, 1);
